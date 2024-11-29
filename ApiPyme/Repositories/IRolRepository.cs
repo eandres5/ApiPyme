@@ -8,5 +8,6 @@ namespace ApiPyme.Repositories
         Task<bool> Save(Rol rol);
         Task<bool> Update(Rol rol);
         Task<bool> Delete(int id);
+        Task<Rol> GetRolByNombre(string nombre);
     }
 }

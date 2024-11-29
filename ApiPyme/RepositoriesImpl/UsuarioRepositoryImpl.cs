@@ -115,7 +115,7 @@ namespace ApiPyme.RepositoriesImpl
                 nuevoUsuario.Password = usuarioDto.Password;
                 nuevoUsuario.Activo = true;
                 // se obtiene el rol para el usuario
-                Rol rol = await _rolRepository.GetRol(Int32.Parse(usuarioDto.IdRol));
+                Rol rol = await _rolRepository.GetRolByNombre(usuarioDto.NombreRol);
                 // se crea la relacion usario rol 
                 UsuarioRol usuarioRol = new UsuarioRol();
                 usuarioRol.usuario = nuevoUsuario;
@@ -193,8 +193,9 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<PagedResult<UsuarioDto>> GetAllUsuariosProveedor(int page, int size, string search)
         {
             var query = from u in _context.Usuarios
-                        join ur in _context.UsuarioRoles on u.IdUsuario equals ur.IdUsuario
-                        where ur.IdRol == 2 && u.Activo == true 
+            join ur in _context.UsuarioRoles on u.IdUsuario equals ur.IdUsuario
+            join r in _context.Rols on ur.IdRol equals r.IdRol
+            where u.Activo == true && r.Nombre == "PROVEEDOR"
                         select u;
 
             // Aplica el filtro de búsqueda si el parámetro `search` no está vacío o nulo
@@ -274,7 +275,8 @@ namespace ApiPyme.RepositoriesImpl
         {
             var query = from u in _context.Usuarios
                         join ur in _context.UsuarioRoles on u.IdUsuario equals ur.IdUsuario
-                        where ur.IdRol == 4 && u.Activo == true
+                        join r in _context.Rols on ur.IdRol equals r.IdRol
+                        where u.Activo == true && r.Nombre == "CLIENTE"
                         select u;
 
             // Aplica el filtro de búsqueda si el parámetro `search` no está vacío o nulo

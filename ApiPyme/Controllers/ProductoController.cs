@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Utilities;
 using System.Text.Json;
 
 namespace ApiPyme.Controllers
@@ -85,6 +86,24 @@ namespace ApiPyme.Controllers
                 return NotFound();
             }
             return Ok(producto);
+        }
+
+        [HttpPut("updateProducto")]
+        public async Task<ActionResult> UpdateProducto(ProductoDto productoDto)
+        {
+
+            try
+            {
+                Producto producto = new Producto();
+                var result = await _productoRepository.UpdateProductoDto(productoDto);
+                return Ok(new { message = "Registro Actualizado" });
+            }
+            catch (Exception ex)
+            {
+                // Devuelve un mensaje de error
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+
+            }
         }
 
     }

@@ -45,12 +45,6 @@ namespace ApiPyme.Context
             .HasOne(ur => ur.rol)
             .WithMany(r => r.UsuarioRoles)
             .HasForeignKey(ur => ur.IdRol);
-            // Configuracion de relaciones y llaves foraneas
-            // relacion producto categoria
-            modelBuilder.Entity<Producto>()
-            .HasOne(p => p.categoria)
-            .WithMany(c => c.productos)
-            .HasForeignKey(p => p.IdCategoria);
             // realcion producto usuario proveedor
             modelBuilder.Entity<Producto>()
             .HasOne(p => p.usuarioProveedor)

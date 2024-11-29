@@ -20,11 +20,10 @@ namespace ApiPyme.Models
         [Required]
         [Column("precio")]
         public decimal Precio { get; set; }
-        [Column("id_categoria")]
-        public int? IdCategoria { get; set; }
+        [Column("nombre_categoria")]
+        public string? NombreCategoria { get; set; }
         [Column("id_usuario_proveedor")]
         public int? IdUsuarioProveedor { get; set; }
-        public Categoria? categoria { get; set; }
         public Usuario? usuarioProveedor { get; set; }
         [Column("qr_path")]
         public string? QrPath { get; set; }

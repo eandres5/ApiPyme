@@ -140,12 +140,12 @@ namespace ApiPyme.Migrations
 
             modelBuilder.Entity("ApiPyme.Models.Comprobante", b =>
                 {
-                    b.Property<int>("IdCompra")
+                    b.Property<int>("IdComprobante")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id_comprobante");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCompra"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdComprobante"));
 
                     b.Property<bool?>("Activo")
                         .HasColumnType("tinyint(1)")
@@ -211,7 +211,7 @@ namespace ApiPyme.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("usuario_modificacion");
 
-                    b.HasKey("IdCompra");
+                    b.HasKey("IdComprobante");
 
                     b.HasIndex("IdUsuarioCliente");
 
@@ -530,6 +530,9 @@ namespace ApiPyme.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("activo");
 
+                    b.Property<int?>("CategoriaIdCategoria")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
@@ -542,13 +545,13 @@ namespace ApiPyme.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("estado_producto");
 
-                    b.Property<int?>("IdCategoria")
-                        .HasColumnType("int")
-                        .HasColumnName("id_categoria");
-
                     b.Property<int?>("IdUsuarioProveedor")
                         .HasColumnType("int")
                         .HasColumnName("id_usuario_proveedor");
+
+                    b.Property<string>("NombreCategoria")
+                        .HasColumnType("longtext")
+                        .HasColumnName("nombre_categoria");
 
                     b.Property<string>("NombreProducto")
                         .IsRequired()
@@ -585,7 +588,7 @@ namespace ApiPyme.Migrations
 
                     b.HasKey("IdProducto");
 
-                    b.HasIndex("IdCategoria");
+                    b.HasIndex("CategoriaIdCategoria");
 
                     b.HasIndex("IdUsuarioProveedor");
 
@@ -859,15 +862,13 @@ namespace ApiPyme.Migrations
 
             modelBuilder.Entity("ApiPyme.Models.Producto", b =>
                 {
-                    b.HasOne("ApiPyme.Models.Categoria", "categoria")
+                    b.HasOne("ApiPyme.Models.Categoria", null)
                         .WithMany("productos")
-                        .HasForeignKey("IdCategoria");
+                        .HasForeignKey("CategoriaIdCategoria");
 
                     b.HasOne("ApiPyme.Models.Usuario", "usuarioProveedor")
                         .WithMany("Productos")
                         .HasForeignKey("IdUsuarioProveedor");
-
-                    b.Navigation("categoria");
 
                     b.Navigation("usuarioProveedor");
                 });

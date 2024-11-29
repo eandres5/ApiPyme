@@ -1,17 +1,3 @@
-
-INSERT INTO sch_pyme.categoria
-(nombre, created_at, updated_at, observacion, usuario_creacion, usuario_modificacion, activo)
-VALUES('Bebidas Destiladas', now(), null, '', 'ADMINISTRADOR', '', 1);
-INSERT INTO sch_pyme.categoria
-(nombre, created_at, updated_at, observacion, usuario_creacion, usuario_modificacion, activo)
-VALUES('Bebidas Fermentadas', now(), null, '', 'ADMINISTRADOR', '', 1);
-INSERT INTO sch_pyme.categoria
-(nombre, created_at, updated_at, observacion, usuario_creacion, usuario_modificacion, activo)
-VALUES('Cervezas', now(), null, '', 'ADMINISTRADOR', '', 1);
-INSERT INTO sch_pyme.categoria
-(nombre, created_at, updated_at, observacion, usuario_creacion, usuario_modificacion, activo)
-VALUES('Agua Ardiente', now(), null, '', 'ADMINISTRADOR', '', 1);
-
 -- Insert para roles del sistema
 -- estos son de forma manula ya que el sistema
 -- esta dividido solo para estos roles
@@ -27,7 +13,7 @@ INSERT INTO sch_pyme.rol
 VALUES('PROVEEDOR', now(), null, '', 'ADMINISTRADOR', null, 1);
 INSERT INTO sch_pyme.rol
 (nombre, created_at, updated_at, observacion, usuario_creacion, usuario_modificacion, activo)
-VALUES('COMERCIANTE', now(), null, '', 'ADMINISTRADOR', null, 1);
+VALUES('CLIENTE', now(), null, '', 'ADMINISTRADOR', null, 1);
 
 
 -- se crea el usuario administrador todo esto se debe hacer por base

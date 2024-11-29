@@ -13,5 +13,6 @@ namespace ApiPyme.Dto
         public string? Direccion { get; set; }
         public string? IdRol { get; set; }
         public string? Password { get; set; }
+        public string? NombreRol { get; set; }
     }
 }

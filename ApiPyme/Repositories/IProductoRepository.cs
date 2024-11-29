@@ -11,6 +11,7 @@ namespace ApiPyme.Repositories
         Task<Producto> GetProducto(int id);
         Task<bool> SaveProducto (ProductoDto productoDto);
         Task<bool> UpdateProducto(Producto producto);
+        Task<bool> UpdateProductoDto(ProductoDto productoDto);
         Task<bool> DeleteProducto(int id);
         Task<string> GenerateQR(Producto producto);
         Task<bool> UpdateProductoCompra(Producto producto);

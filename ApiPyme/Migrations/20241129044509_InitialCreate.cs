@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiPyme.Migrations
 {
     /// <inheritdoc />
-    public partial class crear_base : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -98,6 +98,91 @@ namespace ApiPyme.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Compra",
+                columns: table => new
+                {
+                    id_compra = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    numero_compra = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    tipo_comprobante = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    fecha_compra = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    total_compra = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    iva = table.Column<int>(type: "int", nullable: false),
+                    id_usuario_proveedor = table.Column<int>(type: "int", nullable: true),
+                    id_usuario_comerciante = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    observacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_creacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_modificacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Compra", x => x.id_compra);
+                    table.ForeignKey(
+                        name: "FK_Compra_Usuario_id_usuario_comerciante",
+                        column: x => x.id_usuario_comerciante,
+                        principalTable: "Usuario",
+                        principalColumn: "id_usuario");
+                    table.ForeignKey(
+                        name: "FK_Compra_Usuario_id_usuario_proveedor",
+                        column: x => x.id_usuario_proveedor,
+                        principalTable: "Usuario",
+                        principalColumn: "id_usuario");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Comprobante",
+                columns: table => new
+                {
+                    id_comprobante = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    numero_comprobante = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    tipo_comprobante = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    tipo_transaccion = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    fecha_emision = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    iva = table.Column<int>(type: "int", nullable: false),
+                    subtotal = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    total = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    id_usuario_cliente = table.Column<int>(type: "int", nullable: true),
+                    id_usuario_comerciante = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    observacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_creacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_modificacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comprobante", x => x.id_comprobante);
+                    table.ForeignKey(
+                        name: "FK_Comprobante_Usuario_id_usuario_cliente",
+                        column: x => x.id_usuario_cliente,
+                        principalTable: "Usuario",
+                        principalColumn: "id_usuario");
+                    table.ForeignKey(
+                        name: "FK_Comprobante_Usuario_id_usuario_comerciante",
+                        column: x => x.id_usuario_comerciante,
+                        principalTable: "Usuario",
+                        principalColumn: "id_usuario");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Pedido",
                 columns: table => new
                 {
@@ -145,10 +230,14 @@ namespace ApiPyme.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     stock = table.Column<int>(type: "int", nullable: false),
                     precio = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    id_categoria = table.Column<int>(type: "int", nullable: true),
+                    nombre_categoria = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     id_usuario_proveedor = table.Column<int>(type: "int", nullable: true),
                     qr_path = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    estado_producto = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CategoriaIdCategoria = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     observacion = table.Column<string>(type: "longtext", nullable: true)
@@ -163,8 +252,8 @@ namespace ApiPyme.Migrations
                 {
                     table.PrimaryKey("PK_Producto", x => x.id_producto);
                     table.ForeignKey(
-                        name: "FK_Producto_Categoria_id_categoria",
-                        column: x => x.id_categoria,
+                        name: "FK_Producto_Categoria_CategoriaIdCategoria",
+                        column: x => x.CategoriaIdCategoria,
                         principalTable: "Categoria",
                         principalColumn: "id_categoria");
                     table.ForeignKey(
@@ -206,6 +295,80 @@ namespace ApiPyme.Migrations
                         column: x => x.id_usuario,
                         principalTable: "Usuario",
                         principalColumn: "id_usuario");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "DetalleCompra",
+                columns: table => new
+                {
+                    id_detalle_compra = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    cantidad_inicial = table.Column<int>(type: "int", nullable: false),
+                    id_producto = table.Column<int>(type: "int", nullable: true),
+                    productoIdProducto = table.Column<int>(type: "int", nullable: true),
+                    id_compra = table.Column<int>(type: "int", nullable: true),
+                    precio_unitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    observacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_creacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_modificacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DetalleCompra", x => x.id_detalle_compra);
+                    table.ForeignKey(
+                        name: "FK_DetalleCompra_Compra_id_compra",
+                        column: x => x.id_compra,
+                        principalTable: "Compra",
+                        principalColumn: "id_compra");
+                    table.ForeignKey(
+                        name: "FK_DetalleCompra_Producto_productoIdProducto",
+                        column: x => x.productoIdProducto,
+                        principalTable: "Producto",
+                        principalColumn: "id_producto");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "DetalleComprobante",
+                columns: table => new
+                {
+                    id_detalle_comprobante = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    precio_unitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    cantidad = table.Column<int>(type: "int", nullable: false),
+                    id_producto = table.Column<int>(type: "int", nullable: true),
+                    productoIdProducto = table.Column<int>(type: "int", nullable: true),
+                    id_comprobante = table.Column<int>(type: "int", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    observacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_creacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    usuario_modificacion = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DetalleComprobante", x => x.id_detalle_comprobante);
+                    table.ForeignKey(
+                        name: "FK_DetalleComprobante_Comprobante_id_comprobante",
+                        column: x => x.id_comprobante,
+                        principalTable: "Comprobante",
+                        principalColumn: "id_comprobante");
+                    table.ForeignKey(
+                        name: "FK_DetalleComprobante_Producto_productoIdProducto",
+                        column: x => x.productoIdProducto,
+                        principalTable: "Producto",
+                        principalColumn: "id_producto");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -284,6 +447,46 @@ namespace ApiPyme.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Compra_id_usuario_comerciante",
+                table: "Compra",
+                column: "id_usuario_comerciante");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Compra_id_usuario_proveedor",
+                table: "Compra",
+                column: "id_usuario_proveedor");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comprobante_id_usuario_cliente",
+                table: "Comprobante",
+                column: "id_usuario_cliente");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comprobante_id_usuario_comerciante",
+                table: "Comprobante",
+                column: "id_usuario_comerciante");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DetalleCompra_id_compra",
+                table: "DetalleCompra",
+                column: "id_compra");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DetalleCompra_productoIdProducto",
+                table: "DetalleCompra",
+                column: "productoIdProducto");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DetalleComprobante_id_comprobante",
+                table: "DetalleComprobante",
+                column: "id_comprobante");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DetalleComprobante_productoIdProducto",
+                table: "DetalleComprobante",
+                column: "productoIdProducto");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DetallePedido_id_pedido",
                 table: "DetallePedido",
                 column: "id_pedido");
@@ -314,9 +517,9 @@ namespace ApiPyme.Migrations
                 column: "id_usuario_proveedor");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Producto_id_categoria",
+                name: "IX_Producto_CategoriaIdCategoria",
                 table: "Producto",
-                column: "id_categoria");
+                column: "CategoriaIdCategoria");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Producto_id_usuario_proveedor",
@@ -338,6 +541,12 @@ namespace ApiPyme.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DetalleCompra");
+
+            migrationBuilder.DropTable(
+                name: "DetalleComprobante");
+
+            migrationBuilder.DropTable(
                 name: "DetallePedido");
 
             migrationBuilder.DropTable(
@@ -345,6 +554,12 @@ namespace ApiPyme.Migrations
 
             migrationBuilder.DropTable(
                 name: "UsuarioRol");
+
+            migrationBuilder.DropTable(
+                name: "Compra");
+
+            migrationBuilder.DropTable(
+                name: "Comprobante");
 
             migrationBuilder.DropTable(
                 name: "Pedido");

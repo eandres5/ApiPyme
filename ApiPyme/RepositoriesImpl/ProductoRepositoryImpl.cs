@@ -79,6 +79,7 @@ namespace ApiPyme.RepositoriesImpl
                     Stock = Int32.Parse(productoDto.Stock),
                     Precio = decimal.Parse(productoDto.Precio),
                     Descripcion = productoDto.Descripcion,
+                    NombreCategoria = productoDto.NombreCategoria,
                     Observacion = productoDto.Observacion,
                     usuarioProveedor = proveedor
                 };
@@ -155,6 +156,7 @@ namespace ApiPyme.RepositoriesImpl
                     existe.Stock = producto.Stock;
                     existe.Observacion = producto.Observacion;
                     existe.NombreProducto = producto.NombreProducto;
+                    existe.NombreCategoria = producto.NombreCategoria;
                     existe.UpdateAt = DateTime.Now;
                     await _context.SaveChangesAsync();
                     return true;
@@ -232,7 +234,7 @@ namespace ApiPyme.RepositoriesImpl
                 IdProducto = p.p.IdProducto.ToString(),
                 NombreProducto = p.p.NombreProducto,
                 Descripcion = p.p.Descripcion,
-                Observacion = p.p.Observacion,
+                NombreCategoria = p.p.NombreCategoria,
                 Precio = p.p.Precio.ToString("F2", CultureInfo.InvariantCulture),
                 Stock = p.p.Stock + "",
                 Activo = p.p.Activo,
@@ -402,6 +404,29 @@ namespace ApiPyme.RepositoriesImpl
             };
 
             return productoDto;
+        }
+
+        public async Task<bool> UpdateProductoDto(ProductoDto productoDto)
+        {
+            try
+            {
+                var existe = await _context.Productos.FindAsync(Int32.Parse(productoDto.IdProducto));
+                if (existe != null)
+                {
+                    existe.Stock = Int32.Parse(productoDto.Stock);
+                    existe.Observacion = productoDto.Observacion;
+                    existe.NombreProducto = productoDto.NombreProducto;
+                    existe.NombreCategoria = productoDto.NombreCategoria;
+                    existe.UpdateAt = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

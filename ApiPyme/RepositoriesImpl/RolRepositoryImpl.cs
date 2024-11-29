@@ -1,6 +1,7 @@
 ﻿using ApiPyme.Context;
 using ApiPyme.Models;
 using ApiPyme.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiPyme.RepositoriesImpl
 {
@@ -20,6 +21,11 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<Rol> GetRol(int id)
         {
             return await _context.Rols.FindAsync(id);
+        }
+
+        public async Task<Rol> GetRolByNombre(string nombre)
+        {
+            return await _context.Rols.FirstOrDefaultAsync(r => r.Nombre == nombre);
         }
 
         public async Task<bool> Save(Rol rol)
