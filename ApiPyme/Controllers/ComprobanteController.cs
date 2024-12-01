@@ -69,7 +69,7 @@ namespace ApiPyme.Controllers
 
 
         [HttpGet("getComprobante/{id}/{tipoTransaccion}")]
-        public async Task<ActionResult<IEnumerable<ComprobanteDto>>> GetResumenVentasPorTipoComprobante(int id, string tipoTransaccion)
+        public async Task<ActionResult<IEnumerable<ComprobanteDto>>> GetComprobante(int id, string tipoTransaccion)
         {
             var comprobantes = await _comprobanteRepository.GetComprobante(id, tipoTransaccion);
             return Ok(comprobantes);

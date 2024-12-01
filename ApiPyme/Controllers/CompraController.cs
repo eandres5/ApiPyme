@@ -33,11 +33,13 @@ namespace ApiPyme.Controllers
             try
             {
                 var result = await _compraRepository.Save(compraDto);
+      
                 if (result)
                 {
-                    return Ok("Compra Creada");
+                    return Ok(new { message = "Registro Creado" });
                 }
-                return BadRequest("Error al crear la Compra");
+                return BadRequest("Registro no creado");
+
             }
             catch (Exception ex)
             {
