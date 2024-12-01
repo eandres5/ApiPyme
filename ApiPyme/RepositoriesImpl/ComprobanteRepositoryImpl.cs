@@ -263,5 +263,48 @@ namespace ApiPyme.RepositoriesImpl
             return resultados;
         }
 
+        public async Task<List<ComprobanteResumenReporteDto>> ObtenerResumenComprobantes(DateTime fechaInicio, DateTime fechaFin, string tipoTransaccion)
+        {
+            var resumen = await _context.Comprobantes
+                .Where(c => c.FechaEmision >= fechaInicio && c.FechaEmision <= fechaFin && c.TipoTransaccion == tipoTransaccion)
+                .Join(
+                    _context.DetalleComprobantes,
+                    c => c.IdComprobante,
+                    d => d.IdComprobante,
+                    (c, d) => new { Comprobante = c, Detalle = d }
+                )
+                .Join(
+                    _context.Productos,
+                    cd => cd.Detalle.IdProducto,
+                    p => p.IdProducto,
+                    (cd, p) => new { cd.Comprobante, cd.Detalle, Producto = p }
+                )
+                .Join(
+                    _context.Usuarios,
+                    cdp => cdp.Comprobante.IdUsuarioCliente,
+                    u => u.IdUsuario,
+                    (cdp, u) => new { cdp.Comprobante, cdp.Detalle, cdp.Producto, Usuario = u }
+                )
+                .GroupBy(g => new
+                {
+                    g.Comprobante.NumeroComprobante,
+                    g.Usuario.Nombres,
+                    g.Usuario.Apellidos,
+                    g.Comprobante.FechaEmision
+                })
+                .Select(group => new ComprobanteResumenReporteDto
+                {
+                    NumeroComprobante = group.Key.NumeroComprobante,
+                    Nombres = group.Key.Nombres,
+                    Apellidos = group.Key.Apellidos,
+                    FechaEmision = group.Key.FechaEmision,
+                    Subtotal = group.Sum(x => x.Comprobante.Subtotal),
+                    Total = group.Sum(x => x.Comprobante.Total),
+                    Items = group.Count()
+                })
+                .ToListAsync();
+
+            return resumen;
+        }
     }
 }

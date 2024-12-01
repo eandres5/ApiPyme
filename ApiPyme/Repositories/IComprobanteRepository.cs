@@ -13,5 +13,6 @@ namespace ApiPyme.Repositories
         Task<PagedResult<ComprobanteDto>> GetAllVentas(int page, int size, string search);
         Task<PagedResult<ComprobanteDto>> GetAllDevoluciones(int page, int size, string search);
         Task<List<ComprobanteResumenDto>> GetResumenVentasPorTipoComprobante(string search);
+        Task<List<ComprobanteResumenReporteDto>> ObtenerResumenComprobantes(DateTime fechaInicio, DateTime fechaFin, string tipoTransaccion);
     }
 }

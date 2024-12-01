@@ -2,6 +2,7 @@
 using ApiPyme.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace ApiPyme.Controllers
 {
@@ -73,6 +74,28 @@ namespace ApiPyme.Controllers
         {
             var comprobantes = await _comprobanteRepository.GetComprobante(id, tipoTransaccion);
             return Ok(comprobantes);
+        }
+
+        [HttpGet("getReporteComprobantes/{fechaInicio}/{fechaFin}/{transaccion}")]
+        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> ObtenerResumenComprobantes(string fechaInicio, string fechaFin, string transaccion)
+        {
+
+            try
+            {
+
+                DateTime fechaUno = DateTime.ParseExact(fechaInicio, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                DateTime fechaDos = DateTime.ParseExact(fechaFin, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+
+                var comprobantes = await _comprobanteRepository.ObtenerResumenComprobantes(fechaUno, fechaDos, transaccion);
+
+                return Ok(comprobantes);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Mensaje = ex.Message });
+            }
+
         }
 
     }
