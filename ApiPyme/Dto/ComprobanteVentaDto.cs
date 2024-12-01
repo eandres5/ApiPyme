@@ -1,6 +1,6 @@
 ﻿namespace ApiPyme.Dto
 {
-    public class ComprobanteDto
+    public class ComprobanteVentaDto
     {
         public string? IdComprobante { get; set; }
         public string? NumeroComprobante { get; set; }
@@ -17,6 +17,5 @@
         public string? Identificacion { get; set; }
         public string? Direccion { get; set; }
         public List<DetalleComprobanteDto>? DetalleComprobantes { get; set; }
-
     }
 }

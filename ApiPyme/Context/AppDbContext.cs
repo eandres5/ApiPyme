@@ -14,7 +14,6 @@ namespace ApiPyme.Context
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioRol> UsuarioRoles { get; set; }
         public DbSet<Producto> Productos { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Inventario> Inventarios { get; set; }
         public DbSet<Rol> Rols { get; set; }
         public DbSet<UsuarioRol> UsuarioRol { get; set; }
@@ -74,6 +73,10 @@ namespace ApiPyme.Context
                 .HasOne(d => d.compra)
                 .WithMany(c => c.detallesCompra)
                 .HasForeignKey(d => d.IdCompra);
+            modelBuilder.Entity<DetalleCompra>()
+                .HasOne(d => d.producto)
+                .WithMany(p => p.detallesCompra)
+                .HasForeignKey(d => d.IdProducto);
 
             // realacion comprobante comerciante
             modelBuilder.Entity<Comprobante>()
@@ -89,6 +92,10 @@ namespace ApiPyme.Context
                 .HasOne(d => d.comprobante)
                 .WithMany(c => c.detallesComprobante)
                 .HasForeignKey(d => d.IdComprobante);
+            modelBuilder.Entity<DetalleComprobante>()
+                .HasOne(d => d.producto)
+                .WithMany(p => p.detallesComprobante)
+                .HasForeignKey(d => d.IdProducto);
 
         }
     }

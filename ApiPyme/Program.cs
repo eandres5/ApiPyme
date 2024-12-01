@@ -43,13 +43,13 @@ var _connection = _config.GetConnectionString("MySqlConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(_connection, ServerVersion.AutoDetect(_connection)));
 
-builder.Services.AddScoped<ICategoriaRepository, CategoriaRepositoryImpl>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepositoryImpl>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepositoryImpl>();
 builder.Services.AddScoped<IRolRepository, RolRepositoryImpl>();
 builder.Services.AddScoped<IUsuarioRolRepository, UsuarioRolRepositoryImpl>();
 builder.Services.AddScoped<ICompraRepository, CompraRepositoryImpl>();
 builder.Services.AddScoped<IComprobanteRepository, ComprobanteRepositoryImpl>();
+builder.Services.AddScoped<IDetalleComprobanteRepository, DetalleComprobanteRepositoryImpl>();
 
 builder.Services.AddCors(options =>
 {

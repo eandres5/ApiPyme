@@ -22,49 +22,6 @@ namespace ApiPyme.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("ApiPyme.Models.Categoria", b =>
-                {
-                    b.Property<int>("IdCategoria")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_categoria");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCategoria"));
-
-                    b.Property<bool?>("Activo")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("activo");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("nombre");
-
-                    b.Property<string>("Observacion")
-                        .HasColumnType("longtext")
-                        .HasColumnName("observacion");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UsuarioCreacion")
-                        .HasColumnType("longtext")
-                        .HasColumnName("usuario_creacion");
-
-                    b.Property<string>("UsuarioModificacion")
-                        .HasColumnType("longtext")
-                        .HasColumnName("usuario_modificacion");
-
-                    b.HasKey("IdCategoria");
-
-                    b.ToTable("Categoria", (string)null);
-                });
-
             modelBuilder.Entity("ApiPyme.Models.Compra", b =>
                 {
                     b.Property<int>("IdCompra")
@@ -269,14 +226,11 @@ namespace ApiPyme.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("usuario_modificacion");
 
-                    b.Property<int?>("productoIdProducto")
-                        .HasColumnType("int");
-
                     b.HasKey("IdDetalleCompra");
 
                     b.HasIndex("IdCompra");
 
-                    b.HasIndex("productoIdProducto");
+                    b.HasIndex("IdProducto");
 
                     b.ToTable("DetalleCompra", (string)null);
                 });
@@ -330,14 +284,11 @@ namespace ApiPyme.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("usuario_modificacion");
 
-                    b.Property<int?>("productoIdProducto")
-                        .HasColumnType("int");
-
                     b.HasKey("IdDetalleComprobante");
 
                     b.HasIndex("IdComprobante");
 
-                    b.HasIndex("productoIdProducto");
+                    b.HasIndex("IdProducto");
 
                     b.ToTable("DetalleComprobante", (string)null);
                 });
@@ -530,9 +481,6 @@ namespace ApiPyme.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("activo");
 
-                    b.Property<int?>("CategoriaIdCategoria")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
@@ -587,8 +535,6 @@ namespace ApiPyme.Migrations
                         .HasColumnName("usuario_modificacion");
 
                     b.HasKey("IdProducto");
-
-                    b.HasIndex("CategoriaIdCategoria");
 
                     b.HasIndex("IdUsuarioProveedor");
 
@@ -793,7 +739,7 @@ namespace ApiPyme.Migrations
 
                     b.HasOne("ApiPyme.Models.Producto", "producto")
                         .WithMany("detallesCompra")
-                        .HasForeignKey("productoIdProducto");
+                        .HasForeignKey("IdProducto");
 
                     b.Navigation("compra");
 
@@ -807,8 +753,8 @@ namespace ApiPyme.Migrations
                         .HasForeignKey("IdComprobante");
 
                     b.HasOne("ApiPyme.Models.Producto", "producto")
-                        .WithMany()
-                        .HasForeignKey("productoIdProducto");
+                        .WithMany("detallesComprobante")
+                        .HasForeignKey("IdProducto");
 
                     b.Navigation("comprobante");
 
@@ -862,10 +808,6 @@ namespace ApiPyme.Migrations
 
             modelBuilder.Entity("ApiPyme.Models.Producto", b =>
                 {
-                    b.HasOne("ApiPyme.Models.Categoria", null)
-                        .WithMany("productos")
-                        .HasForeignKey("CategoriaIdCategoria");
-
                     b.HasOne("ApiPyme.Models.Usuario", "usuarioProveedor")
                         .WithMany("Productos")
                         .HasForeignKey("IdUsuarioProveedor");
@@ -888,11 +830,6 @@ namespace ApiPyme.Migrations
                     b.Navigation("usuario");
                 });
 
-            modelBuilder.Entity("ApiPyme.Models.Categoria", b =>
-                {
-                    b.Navigation("productos");
-                });
-
             modelBuilder.Entity("ApiPyme.Models.Compra", b =>
                 {
                     b.Navigation("detallesCompra");
@@ -911,6 +848,8 @@ namespace ApiPyme.Migrations
             modelBuilder.Entity("ApiPyme.Models.Producto", b =>
                 {
                     b.Navigation("detallesCompra");
+
+                    b.Navigation("detallesComprobante");
                 });
 
             modelBuilder.Entity("ApiPyme.Models.Rol", b =>

@@ -16,30 +16,6 @@ namespace ApiPyme.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Categoria",
-                columns: table => new
-                {
-                    id_categoria = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    nombre = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    observacion = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    usuario_creacion = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    usuario_modificacion = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categoria", x => x.id_categoria);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "Rol",
                 columns: table => new
                 {
@@ -237,7 +213,6 @@ namespace ApiPyme.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     estado_producto = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CategoriaIdCategoria = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     observacion = table.Column<string>(type: "longtext", nullable: true)
@@ -251,11 +226,6 @@ namespace ApiPyme.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Producto", x => x.id_producto);
-                    table.ForeignKey(
-                        name: "FK_Producto_Categoria_CategoriaIdCategoria",
-                        column: x => x.CategoriaIdCategoria,
-                        principalTable: "Categoria",
-                        principalColumn: "id_categoria");
                     table.ForeignKey(
                         name: "FK_Producto_Usuario_id_usuario_proveedor",
                         column: x => x.id_usuario_proveedor,
@@ -306,7 +276,6 @@ namespace ApiPyme.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     cantidad_inicial = table.Column<int>(type: "int", nullable: false),
                     id_producto = table.Column<int>(type: "int", nullable: true),
-                    productoIdProducto = table.Column<int>(type: "int", nullable: true),
                     id_compra = table.Column<int>(type: "int", nullable: true),
                     precio_unitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -328,8 +297,8 @@ namespace ApiPyme.Migrations
                         principalTable: "Compra",
                         principalColumn: "id_compra");
                     table.ForeignKey(
-                        name: "FK_DetalleCompra_Producto_productoIdProducto",
-                        column: x => x.productoIdProducto,
+                        name: "FK_DetalleCompra_Producto_id_producto",
+                        column: x => x.id_producto,
                         principalTable: "Producto",
                         principalColumn: "id_producto");
                 })
@@ -344,7 +313,6 @@ namespace ApiPyme.Migrations
                     precio_unitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     cantidad = table.Column<int>(type: "int", nullable: false),
                     id_producto = table.Column<int>(type: "int", nullable: true),
-                    productoIdProducto = table.Column<int>(type: "int", nullable: true),
                     id_comprobante = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -365,8 +333,8 @@ namespace ApiPyme.Migrations
                         principalTable: "Comprobante",
                         principalColumn: "id_comprobante");
                     table.ForeignKey(
-                        name: "FK_DetalleComprobante_Producto_productoIdProducto",
-                        column: x => x.productoIdProducto,
+                        name: "FK_DetalleComprobante_Producto_id_producto",
+                        column: x => x.id_producto,
                         principalTable: "Producto",
                         principalColumn: "id_producto");
                 })
@@ -472,9 +440,9 @@ namespace ApiPyme.Migrations
                 column: "id_compra");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetalleCompra_productoIdProducto",
+                name: "IX_DetalleCompra_id_producto",
                 table: "DetalleCompra",
-                column: "productoIdProducto");
+                column: "id_producto");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DetalleComprobante_id_comprobante",
@@ -482,9 +450,9 @@ namespace ApiPyme.Migrations
                 column: "id_comprobante");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetalleComprobante_productoIdProducto",
+                name: "IX_DetalleComprobante_id_producto",
                 table: "DetalleComprobante",
-                column: "productoIdProducto");
+                column: "id_producto");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DetallePedido_id_pedido",
@@ -515,11 +483,6 @@ namespace ApiPyme.Migrations
                 name: "IX_Pedido_id_usuario_proveedor",
                 table: "Pedido",
                 column: "id_usuario_proveedor");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Producto_CategoriaIdCategoria",
-                table: "Producto",
-                column: "CategoriaIdCategoria");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Producto_id_usuario_proveedor",
@@ -569,9 +532,6 @@ namespace ApiPyme.Migrations
 
             migrationBuilder.DropTable(
                 name: "Rol");
-
-            migrationBuilder.DropTable(
-                name: "Categoria");
 
             migrationBuilder.DropTable(
                 name: "Usuario");

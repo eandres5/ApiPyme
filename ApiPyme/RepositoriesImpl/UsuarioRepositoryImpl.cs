@@ -148,6 +148,7 @@ namespace ApiPyme.RepositoriesImpl
                     existe.Identificacion = string.IsNullOrEmpty(usuario.Identificacion) ? existe.Identificacion : usuario.Identificacion;
                     existe.Direccion = string.IsNullOrEmpty(usuario.Direccion) ? existe.Direccion : usuario.Direccion;
                     existe.Password = string.IsNullOrEmpty(usuario.Password) ? existe.Password : usuario.Password;
+                    existe.Telefono = string.IsNullOrEmpty(usuario.Telefono) ? existe.Telefono : usuario.Telefono;
                     existe.UpdateAt = DateTime.Now;
                     await _context.SaveChangesAsync();
                     return true;

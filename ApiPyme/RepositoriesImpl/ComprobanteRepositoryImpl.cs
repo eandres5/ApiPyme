@@ -107,14 +107,10 @@ namespace ApiPyme.RepositoriesImpl
                 Iva = comprobante.Iva.ToString(),
                 IdUsuarioCliente = comprobante.IdUsuarioCliente?.ToString(),
                 IdUsuarioComerciante = comprobante.IdUsuarioComerciante?.ToString(),
-                UsuarioClienteNombre = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos, // Asumiendo que Usuario tiene un campo 'Nombre'
-                DetalleComprobantes = comprobante.detallesComprobante?.Select(d => new DetalleComprobanteDto
-                {
-                    IdDetalleComprobante = d.IdDetalleComprobante.ToString(),
-                    PrecioUnitario = d.PrecioUnitario.ToString("F2"), // Formato decimal con dos decimales
-                    Cantidad = d.Cantidad.ToString(),
-                    IdProducto = d.IdProducto?.ToString()
-                }).ToList()
+                NombreCliente = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos,
+                Identificacion = comprobante.usuarioCliente?.Identificacion?.ToString(),
+                Direccion = comprobante.usuarioCliente?.Direccion?.ToString(),
+                UsuarioClienteNombre = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos
             };
 
             return comprobanteDto;

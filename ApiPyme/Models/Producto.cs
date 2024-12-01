@@ -30,5 +30,6 @@ namespace ApiPyme.Models
         [Column("estado_producto")]
         public string? EstadoProducto { get; set; }
         public ICollection<DetalleCompra>? detallesCompra { get; set; }
+        public ICollection<DetalleComprobante>? detallesComprobante { get; set; }
     }
 }

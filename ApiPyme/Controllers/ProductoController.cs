@@ -91,7 +91,6 @@ namespace ApiPyme.Controllers
         [HttpPut("updateProducto")]
         public async Task<ActionResult> UpdateProducto(ProductoDto productoDto)
         {
-
             try
             {
                 Producto producto = new Producto();

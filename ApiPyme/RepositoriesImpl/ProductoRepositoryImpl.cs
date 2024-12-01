@@ -417,6 +417,7 @@ namespace ApiPyme.RepositoriesImpl
                     existe.Observacion = productoDto.Observacion;
                     existe.NombreProducto = productoDto.NombreProducto;
                     existe.NombreCategoria = productoDto.NombreCategoria;
+                    existe.Precio = decimal.Parse(productoDto.Precio);
                     existe.UpdateAt = DateTime.Now;
                     await _context.SaveChangesAsync();
                     return true;
