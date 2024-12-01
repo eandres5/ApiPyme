@@ -306,5 +306,42 @@ namespace ApiPyme.RepositoriesImpl
 
             return resumen;
         }
+
+        public async Task<List<ComprobanteResumenReporteDto>> ObtenerReporteCompras(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var resumen = _context.Compras
+                .Where(c => c.FechaCompra >= fechaInicio && c.FechaCompra <= fechaFin)
+                .Join(
+                    _context.DetalleCompras,
+                    c => c.IdCompra,
+                    d => d.IdCompra,
+                    (c, d) => new { Compra = c, Detalle = d }
+                )
+                .Join(
+                    _context.Usuarios,
+                    cd => cd.Compra.IdUsuarioProveedor,
+                    u => u.IdUsuario,
+                    (cd, u) => new { cd.Compra, cd.Detalle, Usuario = u }
+                )
+                .GroupBy(x => new
+                {
+                    x.Compra.NumeroCompra,
+                    x.Usuario.Nombres,
+                    x.Usuario.Apellidos,
+                    x.Compra.FechaCompra,
+                    x.Compra.TotalCompra
+                })
+                .Select(g => new ComprobanteResumenReporteDto
+                {
+                    NumeroComprobante = g.Key.NumeroCompra,
+                    Nombres = g.Key.Nombres,
+                    Apellidos = g.Key.Apellidos,
+                    FechaEmision = g.Key.FechaCompra,
+                    Total = g.Key.TotalCompra,
+                    Items = g.Count()
+                })
+                .ToList();
+            return resumen;
+        }
     }
 }

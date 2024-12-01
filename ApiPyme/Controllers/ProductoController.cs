@@ -56,8 +56,11 @@ namespace ApiPyme.Controllers
 
         // GET: api/Producto/getProductoUsuario
         [HttpGet("getProductoUsuario/{page}/{size}/{search}")]
-        public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductosByUsuario(int page, int size, [FromQuery] string search = null)
+        public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductosByUsuario(int page, int size, string search)
         {
+            if (search.Equals("null")) { 
+                search = null;
+            }
             var productos = await _productoRepository.GetProductosByUsuario(page, size, search);
             return Ok(productos);
         }

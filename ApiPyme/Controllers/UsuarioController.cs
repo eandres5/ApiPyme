@@ -29,10 +29,14 @@ namespace ApiPyme.Controllers
         }
 
         [HttpGet("getProveedores/{page}/{size}/{search}")]
-        public async Task<ActionResult<IEnumerable<UsuarioDto>>> getUsuariosProveedores(int page, int size, [FromQuery] string search = null)
+        public async Task<ActionResult<IEnumerable<UsuarioDto>>> getUsuariosProveedores(int page, int size, string search)
         {
             try
             {
+                if (search.Equals("null")) { 
+                    search = null;
+                }
+
                 var usuarios = await _usuarioRepository.GetAllUsuariosProveedor(page, size, search);
                 return Ok(usuarios);
             }
@@ -44,10 +48,15 @@ namespace ApiPyme.Controllers
         }
 
         [HttpGet("getClientes/{page}/{size}/{search}")]
-        public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetAllUsuariosClientes(int page, int size, [FromQuery] string search = null)
+        public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetAllUsuariosClientes(int page, int size, string search)
         {
             try
             {
+                if (search.Equals("null"))
+                {
+                    search = null;
+                }
+
                 var usuarios = await _usuarioRepository.GetAllUsuariosClientes(page, size, search);
                 return Ok(usuarios);
             }

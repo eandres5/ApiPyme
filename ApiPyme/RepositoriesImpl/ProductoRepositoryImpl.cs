@@ -210,7 +210,8 @@ namespace ApiPyme.RepositoriesImpl
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(u => u.p.NombreProducto.Contains(search));
+                string searchLower = search.ToLower();
+                query = query.Where(u => u.p.NombreProducto.ToLower().Contains(searchLower));
             }
 
             // Asegura que los valores de paginación sean válidos

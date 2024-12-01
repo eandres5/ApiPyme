@@ -280,26 +280,19 @@ namespace ApiPyme.RepositoriesImpl
                         where u.Activo == true && r.Nombre == "CLIENTE"
                         select u;
 
-            // Aplica el filtro de búsqueda si el parámetro `search` no está vacío o nulo
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(u => u.Identificacion.Contains(search));
             }
 
-            // Asegura que los valores de paginación sean válidos
             if (page < 1)
                 page = 1;
 
             if (size < 1)
-                size = 10; // Establecer un tamaño predeterminado si no es válido
+                size = 10;
 
-            // Calcula el número de elementos a saltar
             int skip = (page - 1) * size;
-
-            // Total de elementos antes de aplicar paginación
             int totalCount = await query.CountAsync();
-
-            // Obtener los elementos de la página actual
             var items = await query.Skip(skip).Take(size).ToListAsync();
 
             var usuarioDTOs = items.Select(u => new UsuarioDto
@@ -314,7 +307,6 @@ namespace ApiPyme.RepositoriesImpl
                 CreatedAt = u.CreatedAt
             }).ToList();
 
-            // Retornar el resultado paginado
             return new PagedResult<UsuarioDto>
             {
                 TotalCount = totalCount,
