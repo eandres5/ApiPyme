@@ -82,13 +82,9 @@ namespace ApiPyme.Controllers
 
             try
             {
-
                 DateTime fechaUno = DateTime.ParseExact(fechaInicio, "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 DateTime fechaDos = DateTime.ParseExact(fechaFin, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-
                 var comprobantes = await _comprobanteRepository.ObtenerResumenComprobantes(fechaUno, fechaDos, transaccion);
-
                 return Ok(comprobantes);
             }
             catch (ArgumentException ex)
