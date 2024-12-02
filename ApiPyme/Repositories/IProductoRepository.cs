@@ -21,5 +21,6 @@ namespace ApiPyme.Repositories
         Task<PagedResult<ProductoDto>> GetProductosByProveedor(int page, int size, string identificacion, string search);
         Task<PagedResult<ProductoDto>> GetProductosCliente(int page, int size, string search);
         Task<ActionResult<ProductoDto>> GetProductoConQr(int idProducto);
+        Task<List<ProductoDto>> ObtenerBajoStock();
     }
 }

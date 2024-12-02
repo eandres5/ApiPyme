@@ -15,6 +15,6 @@ namespace ApiPyme.Dto
         public string IdProveedor { get; set; }
         public string? QrCodeImage { get; set; }
         public string? Proveedor { get; set; }
-        public string NombreCategoria { get; set; }
+        public string? NombreCategoria { get; set; }
     }
 }

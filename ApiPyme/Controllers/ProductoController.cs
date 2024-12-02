@@ -108,5 +108,33 @@ namespace ApiPyme.Controllers
             }
         }
 
+        [HttpPost("deleteProducto")]
+        public async Task<ActionResult> DeleteProducto(ProductoDto productoDto)
+        {
+            try
+            {
+                var usuarios = await _productoRepository.DeleteProducto(Int32.Parse(productoDto.IdProducto));
+                return Ok(new { message = "Registro Eliminado" });
+            }
+            catch (Exception ex)
+            {
+                // Devuelve un mensaje de error
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+
+            }
+        }
+
+
+        [HttpGet("getBajoStock")]
+        public async Task<ActionResult<ProductoDto>> ObtenerBajoStock()
+        {
+            var producto = await _productoRepository.ObtenerBajoStock();
+            if (producto == null)
+            {
+                return NotFound();
+            }
+            return Ok(producto);
+        }
+
     }
 }

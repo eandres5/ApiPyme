@@ -224,7 +224,7 @@ namespace ApiPyme.RepositoriesImpl
             var usuarioDTOs = items.Select(u => new UsuarioDto
             {
                 IdUsuario = u.IdUsuario,
-                Nombres = u.Nombres,
+                Nombres = u.Nombres + " " + u.Apellidos,
                 Apellidos = u.Apellidos,
                 Identificacion = u.Identificacion,
                 Direccion = u.Direccion,
@@ -298,7 +298,7 @@ namespace ApiPyme.RepositoriesImpl
             var usuarioDTOs = items.Select(u => new UsuarioDto
             {
                 IdUsuario = u.IdUsuario,
-                Nombres = u.Nombres,
+                Nombres = u.Nombres + " " + u.Apellidos,
                 Apellidos = u.Apellidos,
                 Identificacion = u.Identificacion,
                 Direccion = u.Direccion,

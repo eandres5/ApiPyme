@@ -14,8 +14,7 @@ using System.Globalization;
 
 namespace ApiPyme.RepositoriesImpl
 {
-    public class ProductoRepositoryImpl : IProductoRepository
-    {
+    public class ProductoRepositoryImpl : IProductoRepository{
         private readonly AppDbContext _context;
         private readonly IUsuarioRepository _usuarioRepository;
         public ProductoRepositoryImpl(AppDbContext context, IUsuarioRepository usuarioRepository)
@@ -23,9 +22,25 @@ namespace ApiPyme.RepositoriesImpl
             _context = context;
             _usuarioRepository = usuarioRepository;
         }
-        public Task<bool> DeleteProducto(int id)
+        public async Task<bool> DeleteProducto(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var existe = await _context.Productos.FindAsync(id);
+                if (existe != null)
+                {
+                    existe.Activo = false;
+                    existe.Observacion = "Producto eliminiado";
+                    existe.UpdateAt = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public async Task<string> GenerateQR(Producto producto)
@@ -200,6 +215,7 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<PagedResult<ProductoDto>> GetProductosByUsuario(int page, int size, string search) {
             var query = from p in _context.Productos
                         join u in _context.Usuarios on p.IdUsuarioProveedor equals u.IdUsuario
+                        where p.Activo == true
                         select new
                         {
                             p,
@@ -347,66 +363,7 @@ namespace ApiPyme.RepositoriesImpl
             };
         }
 
-        public async Task<ActionResult<ProductoDto>> GetProductoConQr(int idProducto)
-        {
-            // Obtén el producto por su Id
-            var producto = await _context.Productos
-                .FirstOrDefaultAsync(p => p.IdProducto == idProducto);
-
-            if (producto == null)
-            {
-                throw new ("Producto no encontrado.");
-            }
-
-            // Suponiendo que el campo QrPath tiene la ruta de la imagen
-            var qrImagePath = Path.Combine(Directory.GetCurrentDirectory(), producto.QrPath);
-
-            string qrImageBase64 = null;
-
-            // Verifica si el archivo existe en la ruta especificada
-            if (System.IO.File.Exists(qrImagePath))
-            {
-                try
-                {
-                    // Lee los bytes del archivo
-                    var imageBytes = await System.IO.File.ReadAllBytesAsync(qrImagePath);
-
-                    // Asegúrate de que los bytes se han leído correctamente
-                    if (imageBytes != null && imageBytes.Length > 0)
-                    {
-                        // Convierte los bytes a base64
-                        qrImageBase64 = Convert.ToBase64String(imageBytes);
-                    }
-                    else
-                    {
-                        // Si no se leen bytes, muestra un mensaje de error
-                        Console.WriteLine("No se pudieron leer los bytes de la imagen.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Muestra el mensaje de error si ocurre una excepción
-                    Console.WriteLine($"Error al leer la imagen: {ex.Message}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("El archivo no existe en la ruta especificada.");
-            }
-
-            // Crea un DTO que incluya la información del producto y el QR
-            var productoDto = new ProductoDto
-            {
-                NombreProducto = producto.NombreProducto,
-                Descripcion = producto.Descripcion,
-                Precio = producto.Precio.ToString(),
-                // Incluye la imagen del QR (puede ser en base64 o una URL)
-                QrCodeImage = qrImageBase64
-            };
-
-            return productoDto;
-        }
-
+        
         public async Task<bool> UpdateProductoDto(ProductoDto productoDto)
         {
             try
@@ -429,6 +386,26 @@ namespace ApiPyme.RepositoriesImpl
             {
                 return false;
             }
+        }
+
+        public Task<ActionResult<ProductoDto>> GetProductoConQr(int idProducto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<ProductoDto>> ObtenerBajoStock()
+        {
+            var resultados = await _context.Productos
+                .Where(p => p.Stock < 10)
+                .Select(g => new ProductoDto
+                {
+                    NombreProducto = g.NombreProducto,
+                    Descripcion = g.Descripcion,
+                    Stock = g.Stock.ToString()
+                })
+                .ToListAsync();
+
+            return resultados;
         }
     }
 }
