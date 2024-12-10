@@ -193,7 +193,7 @@ namespace ApiPyme.RepositoriesImpl
                 .Select(g => new ComprobanteResumenDto
                 {
                     TipoComprobante = g.Key,
-                    Total = g.Sum(c => c.TotalCompra)
+                    Total = Math.Round(g.Sum(c => c.TotalCompra))
                 })
                 .ToListAsync();
 

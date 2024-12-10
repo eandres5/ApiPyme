@@ -72,7 +72,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowSpecificOrigins"); // Asegúrate de que esto esté en la posición correcta
+app.UseCors(builder =>
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader());
 app.UseAuthentication();
 app.UseAuthorization();
 
