@@ -388,9 +388,66 @@ namespace ApiPyme.RepositoriesImpl
             }
         }
 
-        public Task<ActionResult<ProductoDto>> GetProductoConQr(int idProducto)
+        public async Task<ActionResult<ProductoDto>> GetProductoConQr(int idProducto)
         {
-            throw new NotImplementedException();
+            // Obtén el producto por su Id
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.IdProducto == idProducto);
+
+            if (producto == null)
+            {
+                throw new("Producto no encontrado.");
+            }
+
+            // Suponiendo que el campo QrPath tiene la ruta de la imagen
+            var qrImagePath = Path.Combine(Directory.GetCurrentDirectory(), producto.QrPath);
+
+            string qrImageBase64 = null;
+
+            // Verifica si el archivo existe en la ruta especificada
+            if (System.IO.File.Exists(qrImagePath))
+            {
+                try
+                {
+                    // Lee los bytes del archivo
+                    var imageBytes = await System.IO.File.ReadAllBytesAsync(qrImagePath);
+
+                    // Asegúrate de que los bytes se han leído correctamente
+                    if (imageBytes != null && imageBytes.Length > 0)
+                    {
+                        // Convierte los bytes a base64
+                        qrImageBase64 = Convert.ToBase64String(imageBytes);
+                    }
+                    else
+                    {
+                        // Si no se leen bytes, muestra un mensaje de error
+                        Console.WriteLine("No se pudieron leer los bytes de la imagen.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Muestra el mensaje de error si ocurre una excepción
+                    Console.WriteLine($"Error al leer la imagen: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("El archivo no existe en la ruta especificada.");
+            }
+
+            // Crea un DTO que incluya la información del producto y el QR
+            var productoDto = new ProductoDto
+            {
+                NombreProducto = producto.NombreProducto,
+                Descripcion = producto.Descripcion,
+                Precio = producto.Precio.ToString(),
+                Stock = producto.Stock.ToString(),
+                NombreCategoria = producto.NombreCategoria,
+                // Incluye la imagen del QR (puede ser en base64 o una URL)
+                QrCodeImage = qrImageBase64
+            };
+
+            return productoDto;
         }
 
         public async Task<List<ProductoDto>> ObtenerBajoStock()

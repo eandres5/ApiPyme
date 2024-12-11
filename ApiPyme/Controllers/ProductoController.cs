@@ -44,9 +44,9 @@ namespace ApiPyme.Controllers
 
         // GET: api/Producto/{id}
         [HttpGet("getProducto/{id}")]
-        public async Task<ActionResult<Producto>> getProducto(int id)
+        public async Task<ActionResult<Producto>> getProducto(string id)
         {
-            var producto = await _productoRepository.GetProducto(id);
+            var producto = await _productoRepository.GetProducto(Int32.Parse(id));
             if (producto == null)
             {
                 return NotFound();

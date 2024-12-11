@@ -110,6 +110,38 @@ namespace ApiPyme.Controllers
             }
 
         }
+        
+        [HttpGet("getResumenVentas")]
+        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> GetResumenVentas()
+        {
+
+            try
+            {
+                var comprobantes = await _comprobanteRepository.GetResumenVentas();
+                return Ok(comprobantes);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Mensaje = ex.Message });
+            }
+
+        }
+
+        [HttpGet("getUltimoComprobante/{tipoComprobante}")]
+        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> GetUltimoNumeroComprobante(string tipoComprobante)
+        {
+
+            try
+            {
+                var comprobantes = await _comprobanteRepository.GetUltimoNumeroComprobante(tipoComprobante);
+                return Ok(comprobantes);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Mensaje = ex.Message });
+            }
+
+        }
 
     }
 

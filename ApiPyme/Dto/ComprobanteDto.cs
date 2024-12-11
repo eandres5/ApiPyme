@@ -16,6 +16,7 @@
         public string? NombreCliente { get; set; }
         public string? Identificacion { get; set; }
         public string? Direccion { get; set; }
+        public string? TipoPago { get; set; }
         public List<DetalleComprobanteDto>? DetalleComprobantes { get; set; }
 
     }

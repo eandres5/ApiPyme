@@ -20,6 +20,9 @@ namespace ApiPyme.Models
         [Column("tipo_transaccion")]
         public string TipoTransaccion { get; set; }
         [Required]
+        [Column("tipo_pago")]
+        public string TipoPago { get; set; }
+        [Required]
         [Column("fecha_emision")]
         public DateTime FechaEmision { get; set; }
         [Column("iva")]

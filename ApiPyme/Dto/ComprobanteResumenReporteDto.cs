@@ -8,6 +8,7 @@
         public DateTime FechaEmision { get; set; }
         public decimal Subtotal { get; set; }
         public decimal Total { get; set; }
+        public string TipoPago { get; set; }
         public int Items { get; set; }
     }
 }

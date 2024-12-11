@@ -124,8 +124,11 @@ namespace ApiPyme.RepositoriesImpl
                 var usuarioCliente = await _usuarioRepository.GetUsuario(Int32.Parse(comprobanteDto.IdUsuarioCliente));
                 var usuarioComerciante = await _usuarioRepository.GetUsuario(Int32.Parse(comprobanteDto.IdUsuarioComerciante));
                 //  guardo la cabecera
+
+                int numeroComprobante = await GetUltimoNumeroComprobante(comprobanteDto.TipoComprobante);
+
                 Comprobante comprobante = new Comprobante();
-                comprobante.NumeroComprobante = comprobanteDto.NumeroComprobante;
+                comprobante.NumeroComprobante = numeroComprobante.ToString();
                 comprobante.TipoComprobante = comprobanteDto.TipoComprobante;
                 comprobante.usuarioCliente = usuarioCliente;
                 comprobante.usuarioComerciante = usuarioComerciante;
@@ -134,7 +137,7 @@ namespace ApiPyme.RepositoriesImpl
                 comprobante.Iva = Int32.Parse(comprobanteDto.Iva);
                 comprobante.Subtotal = decimal.Parse(comprobanteDto.Subtotal, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
                 comprobante.Total = decimal.Parse(comprobanteDto.Total, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
-
+                comprobante.TipoPago = comprobanteDto.TipoPago;
 
                 // primero se verifica los productos si tienen IdProducto
                 await _context.Comprobantes.AddAsync(comprobante);
@@ -263,6 +266,33 @@ namespace ApiPyme.RepositoriesImpl
             return resultados;
         }
 
+
+        public async Task<List<ComprobanteResumenDto>> GetResumenVentas()
+        {
+            // Obtén la fecha actual
+            DateTime fechaActual = DateTime.Now;
+
+            // Determina la fecha de inicio del mes actual (primer día del mes)
+            DateTime inicioDelMes = new DateTime(fechaActual.Year, fechaActual.Month, 1);
+
+            // Consulta usando LINQ
+            var resultados = await _context.Comprobantes
+                .Where(c => c.FechaEmision >= inicioDelMes && c.FechaEmision <= fechaActual)
+                .GroupBy(c => c.TipoComprobante) // Agrupamos por TipoComprobante
+                .Select(g => new ComprobanteResumenDto
+                {
+                    TipoComprobante = g.Key,
+                    Total = Math.Round(
+                        g.Where(c => c.TipoTransaccion == "VENTA").Sum(c => c.Total) - // Total de Ventas
+                        g.Where(c => c.TipoTransaccion == "DEVOLUCION").Sum(c => c.Total), // Total de Devoluciones
+                        2)
+                })
+                .ToListAsync();
+
+            return resultados;
+        }
+
+
         public async Task<List<ComprobanteResumenReporteDto>> ObtenerResumenComprobantes(DateTime fechaInicio, DateTime fechaFin, string tipoTransaccion)
         {
             var resumen = await _context.Comprobantes
@@ -290,13 +320,15 @@ namespace ApiPyme.RepositoriesImpl
                     g.Comprobante.NumeroComprobante,
                     g.Usuario.Nombres,
                     g.Usuario.Apellidos,
-                    g.Comprobante.FechaEmision
+                    g.Comprobante.FechaEmision,
+                    g.Comprobante.TipoPago
                 })
                 .Select(group => new ComprobanteResumenReporteDto
                 {
                     NumeroComprobante = group.Key.NumeroComprobante,
                     Nombres = group.Key.Nombres,
                     Apellidos = group.Key.Apellidos,
+                    TipoPago = group.Key.TipoPago,
                     FechaEmision = group.Key.FechaEmision,
                     Subtotal = group.Sum(x => x.Comprobante.Subtotal),
                     Total = group.Sum(x => x.Comprobante.Total),
@@ -342,6 +374,24 @@ namespace ApiPyme.RepositoriesImpl
                 })
                 .ToList();
             return resumen;
+        }
+
+        public async Task<int> GetUltimoNumeroComprobante(string tipoComprobante)
+        {
+            int numeroComprobante = 0;
+            var ultimoNumeroComprobante = await _context.Comprobantes
+                .Where(c => c.TipoComprobante == tipoComprobante)
+                .OrderByDescending(c => c.NumeroComprobante)
+                .Select(c => c.NumeroComprobante)
+                .FirstOrDefaultAsync();
+
+            if (ultimoNumeroComprobante != null ) {
+                numeroComprobante = Int32.Parse(ultimoNumeroComprobante) + 1;
+            } else {
+                numeroComprobante++;
+            }
+
+            return numeroComprobante;
         }
     }
 }
