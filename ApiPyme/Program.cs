@@ -53,12 +53,12 @@ builder.Services.AddScoped<IDetalleComprobanteRepository, DetalleComprobanteRepo
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigins",
+    options.AddPolicy("AllowAllOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200") // Cambia la URL a la de tu aplicación Angular
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
+            builder.AllowAnyOrigin() // Permite cualquier origen
+                   .AllowAnyHeader() // Permite cualquier encabezado
+                   .AllowAnyMethod(); // Permite cualquier método HTTP
         });
 });
 
