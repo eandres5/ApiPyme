@@ -453,7 +453,7 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<List<ProductoDto>> ObtenerBajoStock()
         {
             var resultados = await _context.Productos
-                .Where(p => p.Stock < 10)
+                .Where(p => p.Stock < 10 && p.Activo == true)
                 .Select(g => new ProductoDto
                 {
                     NombreProducto = g.NombreProducto,
