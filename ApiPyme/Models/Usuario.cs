@@ -25,6 +25,8 @@ namespace ApiPyme.Models
         public string? Telefono { get; set; }
         [Column("Direccion")]
         public string? Direccion { get; set; }
+        [Column("mail")]
+        public string? Mail { get; set; }
         public ICollection<UsuarioRol>? UsuarioRoles { get; set; }
         public ICollection<Producto>? Productos { get; set; }
         public ICollection<Pedido>? PedidosComerciante { get; set; }

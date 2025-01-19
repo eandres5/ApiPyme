@@ -106,33 +106,58 @@ namespace ApiPyme.RepositoriesImpl
         {
             try
             {
-                Usuario nuevoUsuario = new Usuario();
-                nuevoUsuario.Identificacion = usuarioDto.Identificacion;
-                nuevoUsuario.Nombres = usuarioDto.Nombres;
-                nuevoUsuario.Apellidos = usuarioDto.Apellidos;
-                nuevoUsuario.Direccion = usuarioDto.Direccion;
-                nuevoUsuario.Telefono = usuarioDto.Telefono;
-                nuevoUsuario.Password = usuarioDto.Password;
-                nuevoUsuario.Activo = true;
-                // se obtiene el rol para el usuario
+                // Verificar si el usuario ya existe en la base de datos por su identificación
+                var usuarioExistente = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Identificacion == usuarioDto.Identificacion && u.Activo == true);
+
+                if (usuarioExistente != null)
+                {
+                    // Retornar false o lanzar una excepción indicando que el usuario ya existe
+                    throw new Exception("El usuario con esta identificación ya existe.");
+                }
+
+                // Crear un nuevo usuario si no existe
+                Usuario nuevoUsuario = new Usuario
+                {
+                    Identificacion = usuarioDto.Identificacion,
+                    Nombres = usuarioDto.Nombres,
+                    Apellidos = usuarioDto.Apellidos,
+                    Direccion = usuarioDto.Direccion,
+                    Telefono = usuarioDto.Telefono,
+                    Password = usuarioDto.Password,
+                    Mail = usuarioDto.Mail,
+                    Activo = true
+                };
+
+                // Obtener el rol asociado al usuario
                 Rol rol = await _rolRepository.GetRolByNombre(usuarioDto.NombreRol);
-                // se crea la relacion usario rol 
-                UsuarioRol usuarioRol = new UsuarioRol();
-                usuarioRol.usuario = nuevoUsuario;
-                usuarioRol.rol = rol;
-                // se crea un hash para la contraseña del usuario
+                if (rol == null)
+                {
+                    throw new Exception("El rol especificado no existe.");
+                }
+
+                // Crear la relación usuario-rol
+                UsuarioRol usuarioRol = new UsuarioRol
+                {
+                    usuario = nuevoUsuario,
+                    rol = rol
+                };
+
+                // Crear un hash para la contraseña del usuario
                 nuevoUsuario.Password = _passwordHasher.HashPassword(nuevoUsuario, nuevoUsuario.Password);
 
+                // Agregar el usuario y su relación con el rol a la base de datos
                 await _context.Usuarios.AddAsync(nuevoUsuario);
                 await _context.UsuarioRol.AddAsync(usuarioRol);
 
+                // Guardar los cambios en la base de datos
                 await _context.SaveChangesAsync();
+
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Manejo de excepciones
-                return false;
+                throw;
             }
         }
 
@@ -149,6 +174,7 @@ namespace ApiPyme.RepositoriesImpl
                     existe.Direccion = string.IsNullOrEmpty(usuario.Direccion) ? existe.Direccion : usuario.Direccion;
                     existe.Password = string.IsNullOrEmpty(usuario.Password) ? existe.Password : usuario.Password;
                     existe.Telefono = string.IsNullOrEmpty(usuario.Telefono) ? existe.Telefono : usuario.Telefono;
+                    existe.Mail = string.IsNullOrEmpty(usuario.Mail) ? existe.Mail : usuario.Mail;
                     existe.UpdateAt = DateTime.Now;
                     await _context.SaveChangesAsync();
                     return true;
@@ -230,6 +256,7 @@ namespace ApiPyme.RepositoriesImpl
                 Direccion = u.Direccion,
                 Telefono = u.Telefono,
                 Activo = u.Activo,
+                Mail = u.Mail,
                 CreatedAt = u.CreatedAt
             }).ToList();
 
@@ -249,7 +276,7 @@ namespace ApiPyme.RepositoriesImpl
                 var user = await _context.Usuarios
                                  .Include(u => u.UsuarioRoles)
                                  .ThenInclude(ur => ur.rol)
-                                 .FirstOrDefaultAsync(u => u.Identificacion == identificacion);
+                                 .FirstOrDefaultAsync(u => u.Identificacion == identificacion && u.Activo == true);
 
                 // Si no se encuentra el usuario, lanzar una excepción
                 if (user == null)
@@ -262,6 +289,7 @@ namespace ApiPyme.RepositoriesImpl
                 usuario.Nombres = user.Nombres + " " + user.Apellidos;
                 usuario.Identificacion = user.Identificacion;
                 usuario.Direccion = user.Direccion;
+                usuario.Mail = user.Mail;
                 return usuario;
             }
             catch (Exception ex)
@@ -304,6 +332,7 @@ namespace ApiPyme.RepositoriesImpl
                 Direccion = u.Direccion,
                 Telefono = u.Telefono,
                 Activo = u.Activo,
+                Mail = u.Mail,
                 CreatedAt = u.CreatedAt
             }).ToList();
 

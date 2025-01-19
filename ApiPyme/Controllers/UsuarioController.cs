@@ -75,11 +75,13 @@ namespace ApiPyme.Controllers
             try
             {
                 var result = await _usuarioRepository.SaveUsuario(UsuarioDto);
-                if (result)
+
+                if(result)
                 {
-                    return Ok(new { message = "Registro Creado" });
+                    return Ok(new { message = "Usuario registrado" });
                 }
-                return BadRequest(new { message = "Error al crear" });
+                return BadRequest(new { message = "Error al crear registro" });
+
             }
             catch (Exception ex)
             {
