@@ -8,13 +8,13 @@ namespace ApiPyme.Service
     {
         private readonly string smtpHost = "smtp.gmail.com"; // Servidor SMTP, por ejemplo, Gmail
         private readonly int smtpPort = 587; // Puerto para SMTP con STARTTLS
-        private readonly string smtpUser = "catopyt@gmail.com"; // Tu dirección de correo
-        private readonly string smtpPass = "cncf zqhp ebef sayh"; // Contraseña o App Password
+        private readonly string smtpUser = "gaby.1994.qp@gmail.com"; // Tu dirección de correo
+        private readonly string smtpPass = "qbgd mclv yoef zxbp"; // Contraseña o App Password
 
         public string sendMail(string to, string asunto, string body)
         {
             string msge = "Error al enviar este correo. Por favor verifique los datos o intente más tarde.";
-            string from = "catopyt@gmail.com";
+            string from = "gaby.1994.qp@gmail.com";
             string displayName = "PYME";
             try
             {
