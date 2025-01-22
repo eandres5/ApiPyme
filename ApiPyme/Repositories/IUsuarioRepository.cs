@@ -15,6 +15,7 @@ namespace ApiPyme.Repositories
         Task<bool> DeleteUsuario(UsuarioDto usuarioDto);
         Task<Usuario> GetLogin(LoginRequestDto login);
         Task<PagedResult<UsuarioDto>> GetAllUsuariosClientes(int page, int size, string search);
-        
+        Task<bool> RecoveryPassword(EmailDto correo);
+        Task<bool> UpdatePassword(RecuperarPasswordDTO recuperarPasswordDTO);
     }
 }

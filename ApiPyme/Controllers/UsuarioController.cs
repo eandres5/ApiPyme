@@ -1,6 +1,7 @@
 ﻿using ApiPyme.Dto;
 using ApiPyme.Models;
 using ApiPyme.Repositories;
+using ApiPyme.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace ApiPyme.Controllers
     {
 
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly EmailService _emailService;
 
         public UsuarioController(IUsuarioRepository usuarioRepository)
         {
             _usuarioRepository = usuarioRepository;
+            _emailService = new EmailService();
         }
 
         // GET: api/Usuario/getLista
@@ -150,6 +153,37 @@ namespace ApiPyme.Controllers
 
             }
         }
+        [HttpPost("recoveryPassword")]
+        public async Task<ActionResult<UsuarioDto>> Recovery(EmailDto correo)
+        {
+            try
+            {
+                var usuarios = await _usuarioRepository.RecoveryPassword(correo);
+                //await _emailService.EnviarCorreoAsync(correo.Correo, "Recuperar Acceso", "");
 
+                return Ok(new { message = "Mail enviado" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("restablecerPassword")]
+        public async Task<ActionResult<UsuarioDto>> UpdatePassword(RecuperarPasswordDTO recuperarPasswordDTO)
+        {
+            try
+            {
+                var usuarios = await _usuarioRepository.UpdatePassword(recuperarPasswordDTO);
+                //await _emailService.EnviarCorreoAsync(correo.Correo, "Recuperar Acceso", "");
+
+                return Ok(new { message = "200" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+            }
+        }
+        
     }
 }

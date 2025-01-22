@@ -21,6 +21,7 @@ namespace ApiPyme.Context
         public DbSet<DetalleCompra> DetalleCompras { get; set; }
         public DbSet<Comprobante> Comprobantes { get; set; }
         public DbSet<DetalleComprobante> DetalleComprobantes { get; set; }
+        public DbSet<RecuperacionPassword> RecuperacionPassword { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

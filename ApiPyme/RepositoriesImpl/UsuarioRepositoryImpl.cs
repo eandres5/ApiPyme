@@ -2,6 +2,7 @@
 using ApiPyme.Dto;
 using ApiPyme.Models;
 using ApiPyme.Repositories;
+using ApiPyme.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,14 @@ namespace ApiPyme.RepositoriesImpl
         private readonly PasswordHasher<Usuario> _passwordHasher = new PasswordHasher<Usuario>();
         private readonly IRolRepository _rolRepository;
         private readonly IUsuarioRolRepository _usuarioRolRepository;
-        public UsuarioRepositoryImpl(AppDbContext context, IUsuarioRolRepository usuarioRolRepository, IRolRepository rolRepository)
+        private readonly EmailService _emailService;
+        public UsuarioRepositoryImpl(AppDbContext context, IUsuarioRolRepository usuarioRolRepository, 
+            IRolRepository rolRepository)
         {
             _context = context;
             _usuarioRolRepository = usuarioRolRepository;
             _rolRepository = rolRepository;
+            _emailService = new EmailService();
         }
         public async Task<bool> DeleteUsuario(UsuarioDto usuarioDto)
         {
@@ -172,7 +176,12 @@ namespace ApiPyme.RepositoriesImpl
                     existe.Apellidos = string.IsNullOrEmpty(usuario.Apellidos) ? existe.Apellidos : usuario.Apellidos;
                     existe.Identificacion = string.IsNullOrEmpty(usuario.Identificacion) ? existe.Identificacion : usuario.Identificacion;
                     existe.Direccion = string.IsNullOrEmpty(usuario.Direccion) ? existe.Direccion : usuario.Direccion;
-                    existe.Password = string.IsNullOrEmpty(usuario.Password) ? existe.Password : usuario.Password;
+
+                    if (!string.IsNullOrEmpty(usuario.Password))
+                    {
+                        existe.Password = _passwordHasher.HashPassword(existe, usuario.Password);
+                        passwordModificado(existe.Mail);
+                    }
                     existe.Telefono = string.IsNullOrEmpty(usuario.Telefono) ? existe.Telefono : usuario.Telefono;
                     existe.Mail = string.IsNullOrEmpty(usuario.Mail) ? existe.Mail : usuario.Mail;
                     existe.UpdateAt = DateTime.Now;
@@ -343,5 +352,89 @@ namespace ApiPyme.RepositoriesImpl
             };
         }
 
+        public async Task<bool> RecoveryPassword(EmailDto correo)
+        {
+
+            try
+            {
+                var user = await _context.Usuarios
+                                 .Include(u => u.UsuarioRoles)
+                                 .ThenInclude(ur => ur.rol)
+                                 .FirstOrDefaultAsync(u => u.Mail == correo.Correo && u.Activo == true);
+                if (user == null)
+                {
+                    throw new Exception("El correo no es valido");
+                }
+
+                var token = Guid.NewGuid().ToString();
+                var fechaExpiracion = DateTime.UtcNow.AddHours(1);
+
+                RecuperacionPassword recuperacion = new RecuperacionPassword();
+                recuperacion.UsuarioId = user.IdUsuario;
+                recuperacion.Token = token;
+                recuperacion.FechaExpiracion = fechaExpiracion;
+
+                await _context.RecuperacionPassword.AddAsync(recuperacion);
+                await _context.SaveChangesAsync();
+
+                // Enviar correo con el enlace
+                var enlace = $"http://localhost:4200/#/recovery?token={token}";
+                _emailService.sendMail(correo.Correo, "Recuperación de Contraseña",
+                    $"Hola,<br><br>Haz solicitado recuperar tu contraseña. " +
+                    $"Haz clic en el siguiente enlace para restablecerla:<br><a href='{enlace}'>Restablecer Contraseña</a><br><br>Este enlace es válido por 1 hora.<br><br>Gracias.");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
+        }
+
+        public async Task<bool> UpdatePassword(RecuperarPasswordDTO recuperarPasswordDTO)
+        {
+            try
+            {
+                var recuperacion = await _context.RecuperacionPassword
+               .FirstOrDefaultAsync(r => r.Token == recuperarPasswordDTO.Token && r.FechaExpiracion > DateTime.UtcNow);
+
+                if (recuperacion == null)
+                {
+                    throw new Exception("El token es inválido o ha expirado.");
+                }
+
+                var usuario = await _context.Usuarios.FindAsync(recuperacion.UsuarioId);
+                if (usuario == null)
+                {
+                    throw new Exception("Usuario no encontrado.");
+                }
+
+                usuario.Password = _passwordHasher.HashPassword(usuario, recuperarPasswordDTO.Password);
+
+                // Guardar los cambios y eliminar el token
+                _context.RecuperacionPassword.Remove(recuperacion);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task<bool> passwordModificado(String correo) {
+
+            try
+            {
+                _emailService.sendMail(correo, "Cambio de Contraseña",
+                    $"Hola,<br><br>Haz cambiado la contraseña de tu cuenta, sino realizaste esta acción por favor ve al apartado de login y recuperar contraseña para reestablecerla. ");
+                return true;
+            } catch (Exception ex) {
+                throw;
+            }
+            
+        }
     }
 }
