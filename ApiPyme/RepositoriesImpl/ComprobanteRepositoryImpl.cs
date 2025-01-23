@@ -154,7 +154,7 @@ namespace ApiPyme.RepositoriesImpl
                 comprobante.TipoPago = comprobanteDto.TipoPago;
                 comprobante.PathPdf = "";
                 //  guardo la cabecera
-                if (comprobanteDto.FileBase64 != null)
+                if (comprobanteDto.FileBase64 != "")
                 {
                     string filePath = GuardarArchivoPdf(comprobanteDto.FileBase64);
                     comprobante.PathPdf = filePath;
