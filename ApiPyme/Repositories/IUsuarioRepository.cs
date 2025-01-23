@@ -10,6 +10,7 @@ namespace ApiPyme.Repositories
         Task<PagedResult<UsuarioDto>> GetAllUsuariosProveedor(int page, int size, string search);
         Task<UsuarioDto> GetUsuarioByIdentificaion(string identificacion);
         Task<Usuario> GetUsuario(int id);
+        Task<UsuarioDto> GetUsuarioById(int id);
         Task<bool> SaveUsuario(UsuarioDto usuarioDto);
         Task<bool> UpdateUsuario(UsuarioDto usuario);
         Task<bool> DeleteUsuario(UsuarioDto usuarioDto);

@@ -17,6 +17,8 @@
         public string? Identificacion { get; set; }
         public string? Direccion { get; set; }
         public string? TipoPago { get; set; }
+        public string? FileBase64 { get; set; }
+
         public List<DetalleComprobanteDto>? DetalleComprobantes { get; set; }
 
     }

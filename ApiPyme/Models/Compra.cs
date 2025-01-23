@@ -28,6 +28,8 @@ namespace ApiPyme.Models
         public int? IdUsuarioProveedor { get; set; }
         [Column("id_usuario_comerciante")]
         public int? IdUsuarioComerciante { get; set; }
+        [Column("path_pdf")]
+        public string? PathPdf { get; set; }
         public Usuario? usuarioProveedor { get; set; }
         public Usuario? usuarioComerciante { get; set; }
         public ICollection<DetalleCompra>? detallesCompra { get; set; }

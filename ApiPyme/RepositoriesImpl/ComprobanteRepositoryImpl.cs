@@ -12,6 +12,8 @@ namespace ApiPyme.RepositoriesImpl
         private readonly AppDbContext _context;
         private readonly IProductoRepository _productoRepository;
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly string _uploadFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedFiles");
+
         public ComprobanteRepositoryImpl(AppDbContext context, IProductoRepository productoRepository, IUsuarioRepository usuarioRepository)
         {
             _context = context;
@@ -22,13 +24,6 @@ namespace ApiPyme.RepositoriesImpl
 
         public async Task<PagedResult<ComprobanteDto>> GetAllVentas(int page, int size, string search)
         {
-            // Asegura que los valores de paginación sean válidos
-            page = Math.Max(page, 1);  // Asegura que la página mínima sea 1
-            size = Math.Max(size, 10); // Establecer un tamaño predeterminado si no es válido
-
-            // Calcula el número de elementos a saltar
-            int skip = (page - 1) * size;
-
             // Realiza el join entre Comprobante y Usuario usando IdUsuarioCliente
             var query = from comprobante in _context.Comprobantes
                         join usuario in _context.Usuarios
@@ -46,6 +41,15 @@ namespace ApiPyme.RepositoriesImpl
                 query = query.Where(x => x.Comprobante.NumeroComprobante.Contains(search) ||
                                          x.Usuario.Identificacion.Contains(search));
             }
+
+            // Asegura que los valores de paginación sean válidos
+            if (page < 1)
+                page = 1;
+            if (size < 1)
+                size = 10; // Establecer un tamaño predeterminado si no es válido
+
+            // Calcula el número de elementos a saltar
+            int skip = (page - 1) * size;
 
             // Total de elementos antes de aplicar paginación
             int totalCount = await query.CountAsync();
@@ -95,6 +99,15 @@ namespace ApiPyme.RepositoriesImpl
                 return null;
             }
 
+            // Leer y convertir el archivo PDF a Base64
+            string? fileBase64 = null;
+            if (!string.IsNullOrEmpty(comprobante.PathPdf) && File.Exists(comprobante.PathPdf))
+            {
+                var fileBytes = await File.ReadAllBytesAsync(comprobante.PathPdf);
+                fileBase64 = Convert.ToBase64String(fileBytes);
+            }
+
+
             var comprobanteDto = new ComprobanteDto
             {
                 IdComprobante = comprobante.IdComprobante.ToString(),
@@ -110,7 +123,8 @@ namespace ApiPyme.RepositoriesImpl
                 NombreCliente = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos,
                 Identificacion = comprobante.usuarioCliente?.Identificacion?.ToString(),
                 Direccion = comprobante.usuarioCliente?.Direccion?.ToString(),
-                UsuarioClienteNombre = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos
+                UsuarioClienteNombre = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos,
+                FileBase64 = fileBase64
             };
 
             return comprobanteDto;
@@ -138,6 +152,13 @@ namespace ApiPyme.RepositoriesImpl
                 comprobante.Subtotal = decimal.Parse(comprobanteDto.Subtotal, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
                 comprobante.Total = decimal.Parse(comprobanteDto.Total, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
                 comprobante.TipoPago = comprobanteDto.TipoPago;
+                comprobante.PathPdf = "";
+                //  guardo la cabecera
+                if (comprobanteDto.FileBase64 != null)
+                {
+                    string filePath = GuardarArchivoPdf(comprobanteDto.FileBase64);
+                    comprobante.PathPdf = filePath;
+                }
 
                 // primero se verifica los productos si tienen IdProducto
                 await _context.Comprobantes.AddAsync(comprobante);
@@ -393,5 +414,31 @@ namespace ApiPyme.RepositoriesImpl
 
             return numeroComprobante;
         }
+
+        private string GuardarArchivoPdf(string fileBase64)
+        {
+            try
+            {
+                var base64Data = fileBase64.Split(",")[1]; // Remover encabezado Base64
+                var fileBytes = Convert.FromBase64String(base64Data);
+
+                // Crear la carpeta si no existe
+                if (!Directory.Exists(_uploadFolderPath))
+                {
+                    Directory.CreateDirectory(_uploadFolderPath);
+                }
+
+                var filePath = Path.Combine(_uploadFolderPath, $"{Guid.NewGuid()}.pdf");
+                File.WriteAllBytes(filePath, fileBytes);
+
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al guardar el archivo PDF: {ex.Message}", ex);
+            }
+        }
+
+
     }
 }

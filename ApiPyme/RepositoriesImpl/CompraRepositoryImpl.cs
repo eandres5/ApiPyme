@@ -13,6 +13,8 @@ namespace ApiPyme.RepositoriesImpl
         private readonly AppDbContext _context;
         private readonly IProductoRepository _productoRepository;
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly string _uploadFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedFiles");
+
         public CompraRepositoryImpl(AppDbContext context, IProductoRepository productoRepository, IUsuarioRepository usuarioRepository)
         {
             _context = context;
@@ -70,14 +72,24 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<CompraDto> GetCompra(int id)
         {
             var compra = await _context.Compras
-             .Include(c => c.detallesCompra)
-             .FirstOrDefaultAsync(c => c.IdCompra == id);
+        .Include(c => c.detallesCompra)
+        .ThenInclude(d => d.producto) // Incluir la relación con Producto
+        .FirstOrDefaultAsync(c => c.IdCompra == id);
 
             if (compra == null)
             {
                 return null;
             }
 
+            // Leer y convertir el archivo PDF a Base64
+            string? fileBase64 = null;
+            if (!string.IsNullOrEmpty(compra.PathPdf) && File.Exists(compra.PathPdf))
+            {
+                var fileBytes = await File.ReadAllBytesAsync(compra.PathPdf);
+                fileBase64 = Convert.ToBase64String(fileBytes);
+            }
+
+            // Crear el DTO
             var compraDto = new CompraDto
             {
                 IdCompra = compra.IdCompra.ToString(),
@@ -88,12 +100,13 @@ namespace ApiPyme.RepositoriesImpl
                 Iva = compra.Iva.ToString(),
                 IdUsuarioProveedor = compra.IdUsuarioProveedor?.ToString(),
                 IdUsuarioComerciante = compra.IdUsuarioComerciante?.ToString(),
+                FileBase64 = fileBase64, // Asignar el archivo en Base64
                 DetalleCompras = compra.detallesCompra?.Select(d => new DetalleCompraDto
                 {
-                    // Asignación de propiedades del detalle
                     IdDetalleCompra = d.IdDetalleCompra.ToString(),
                     CantidadInicial = d.CantidadInicial.ToString(),
                     IdProducto = d.IdProducto?.ToString(),
+                    NombreProducto = d.producto?.NombreProducto, // Incluir el nombre del producto
                     PrecioUnitario = d.PrecioUnitario.ToString("F2") // Formato decimal con dos decimales
                 }).ToList()
             };
@@ -108,15 +121,25 @@ namespace ApiPyme.RepositoriesImpl
                 // busco el id de usuario proveedor y comerciante
                 var usuarioProveedor = await _usuarioRepository.GetUsuario(Int32.Parse(compraDto.IdUsuarioProveedor));
                 var usuarioComerciante = await _usuarioRepository.GetUsuario(Int32.Parse(compraDto.IdUsuarioComerciante));
+
                 //  guardo la cabecera
+                if (compraDto.FileBase64 == null)
+                {
+                    throw new Exception("PDF requerido");
+                }
+
+                string filePath = GuardarArchivoPdf(compraDto.FileBase64);
+
                 Compra compra = new Compra();
                 compra.NumeroCompra = compraDto.NumeroCompra;
+                compra.Iva = Int32.Parse(compraDto.Iva);
                 compra.Observacion = compraDto.Observacion;
                 compra.TipoComprobante = compraDto.TipoComprobante;
                 compra.usuarioProveedor = usuarioProveedor;
                 compra.usuarioComerciante = usuarioComerciante;
                 compra.FechaCompra = DateTime.ParseExact(compraDto.FechaCompra, "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 compra.TotalCompra = decimal.Parse(compraDto.TotalCompra, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture);
+                compra.PathPdf = filePath;
 
                 // primero se verifica los productos si tienen IdProducto
                 await _context.Compras.AddAsync(compra);
@@ -199,6 +222,32 @@ namespace ApiPyme.RepositoriesImpl
 
             return resultados;
         }
+
+        private string GuardarArchivoPdf(string fileBase64)
+        {
+            try
+            {
+                var base64Data = fileBase64.Split(",")[1]; // Remover encabezado Base64
+                var fileBytes = Convert.FromBase64String(base64Data);
+
+                // Crear la carpeta si no existe
+                if (!Directory.Exists(_uploadFolderPath))
+                {
+                    Directory.CreateDirectory(_uploadFolderPath);
+                }
+
+                var filePath = Path.Combine(_uploadFolderPath, $"{Guid.NewGuid()}.pdf");
+                File.WriteAllBytes(filePath, fileBytes);
+
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al guardar el archivo PDF: {ex.Message}", ex);
+            }
+        }
+
+
 
     }
 }

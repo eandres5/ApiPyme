@@ -309,6 +309,40 @@ namespace ApiPyme.RepositoriesImpl
                 throw;
             }
         }
+
+        public async Task<UsuarioDto> GetUsuarioById(int id)
+        {
+            try
+            {
+                // Buscar el usuario por identificación
+                var user = await _context.Usuarios
+                                 .Include(u => u.UsuarioRoles)
+                                 .ThenInclude(ur => ur.rol)
+                                 .FirstOrDefaultAsync(u => u.IdUsuario == id && u.Activo == true);
+
+                // Si no se encuentra el usuario, lanzar una excepción
+                if (user == null)
+                {
+                    throw new KeyNotFoundException($"Usuario no encontrado.");
+                }
+                // Devolver el usuario encontrado
+                UsuarioDto usuario = new UsuarioDto();
+                usuario.IdUsuario = user.IdUsuario;
+                usuario.Nombres = user.Nombres + " " + user.Apellidos;
+                usuario.Identificacion = user.Identificacion;
+                usuario.Direccion = user.Direccion;
+                usuario.Mail = user.Mail;
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                // Aquí puedes manejar la excepción o relanzarla
+                // Ejemplo: loguear la excepción
+                Console.WriteLine($"Error al obtener el usuario: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<PagedResult<UsuarioDto>> GetAllUsuariosClientes(int page, int size, string search)
         {
             var query = from u in _context.Usuarios

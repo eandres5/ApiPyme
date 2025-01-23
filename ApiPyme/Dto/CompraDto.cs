@@ -10,6 +10,7 @@
         public string? Iva { get; set; }
         public string? IdUsuarioProveedor { get; set; }
         public string? IdUsuarioComerciante { get; set; }
+        public string? FileBase64 { get; set; }
         public List<DetalleCompraDto>? DetalleCompras { get; set; }
     }
 }

@@ -320,10 +320,12 @@ namespace ApiPyme.RepositoriesImpl
 
         public async Task<PagedResult<ProductoDto>> GetProductosCliente(int page, int size, string search)
         {
-            var query = _context.Productos.AsQueryable();
+            // Inicia la consulta, filtrando solo productos activos
+            var query = _context.Productos.Where(c => c.Activo == true);
 
             if (!string.IsNullOrEmpty(search))
             {
+                // Agrega el filtro de búsqueda si el parámetro 'search' no es nulo ni vacío
                 query = query.Where(u => u.NombreProducto.Contains(search));
             }
 
@@ -343,14 +345,15 @@ namespace ApiPyme.RepositoriesImpl
             // Obtener los elementos de la página actual
             var items = await query.Skip(skip).Take(size).ToListAsync();
 
+            // Mapear los resultados a ProductoDto
             var productoDto = items.Select(p => new ProductoDto
             {
                 IdProducto = p.IdProducto.ToString(),
                 NombreProducto = p.NombreProducto,
                 Descripcion = p.Descripcion,
                 Observacion = p.Observacion,
-                Precio = p.Precio + "",
-                Stock = p.Stock + "",
+                Precio = p.Precio.ToString(),
+                Stock = p.Stock.ToString(),
                 Activo = p.Activo,
                 CreatedAt = p.CreatedAt
             });

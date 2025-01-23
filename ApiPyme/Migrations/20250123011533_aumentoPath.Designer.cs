@@ -4,6 +4,7 @@ using ApiPyme.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiPyme.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250123011533_aumentoPath")]
+    partial class aumentoPath
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,10 +144,6 @@ namespace ApiPyme.Migrations
                     b.Property<string>("Observacion")
                         .HasColumnType("longtext")
                         .HasColumnName("observacion");
-
-                    b.Property<string>("PathPdf")
-                        .HasColumnType("longtext")
-                        .HasColumnName("path_pdf");
 
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(65,30)")

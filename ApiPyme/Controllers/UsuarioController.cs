@@ -106,6 +106,17 @@ namespace ApiPyme.Controllers
             return Ok(usuario);
         }
 
+        [HttpGet("getUsuarioDto/{id}")]
+        public async Task<ActionResult<Usuario>> GetUsuarioById(int id)
+        {
+            var usuario = await _usuarioRepository.GetUsuarioById(id);
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+            return Ok(usuario);
+        }
+
         [HttpPut("updateProveedor")]
         public async Task<ActionResult> UpdateUsuarioProveedor(UsuarioDto usuario)
         {
