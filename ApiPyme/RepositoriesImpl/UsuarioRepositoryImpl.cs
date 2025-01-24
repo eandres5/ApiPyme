@@ -412,7 +412,7 @@ namespace ApiPyme.RepositoriesImpl
                 await _context.SaveChangesAsync();
 
                 // Enviar correo con el enlace
-                var enlace = $"http://localhost:4200/#/recovery?token={token}";
+                var enlace = $"https://www.pymesecuador.org/#/recovery?token={token}";
                 _emailService.sendMail(correo.Correo, "Recuperación de Contraseña",
                     $"Hola,<br><br>Haz solicitado recuperar tu contraseña. " +
                     $"Haz clic en el siguiente enlace para restablecerla:<br><a href='{enlace}'>Restablecer Contraseña</a><br><br>Este enlace es válido por 1 hora.<br><br>Gracias.");
