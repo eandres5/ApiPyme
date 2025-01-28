@@ -30,6 +30,7 @@ namespace ApiPyme.RepositoriesImpl
             // Proyecta los resultados a DetalleProductoDto
             var detalleProductos = detalles.Select(detalle => new DetalleProductoDto
             {
+                IdProducto = detalle.IdProducto.ToString(),
                 IdComprobante = detalle.IdComprobante.ToString(),
                 NombreProducto = detalle.producto?.NombreProducto,
                 Descripcion = detalle.producto?.Descripcion,

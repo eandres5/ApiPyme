@@ -76,6 +76,23 @@ namespace ApiPyme.Controllers
             return Ok(comprobantes);
         }
 
+        [HttpGet("getComprobanteVentaDevolucion/{identificacion}/{numeroComprobante}/{tipoTransaccion}")]
+        public async Task<ActionResult<IEnumerable<ComprobanteDto>>> GetComprobante(string identificacion, string numeroComprobante, string tipoTransaccion)
+        {
+            try
+            {
+                var comprobantes = await _comprobanteRepository.GetComprobanteVentaDevolucion(identificacion, numeroComprobante, tipoTransaccion);
+                return Ok(comprobantes);
+            }
+            catch (Exception ex)
+            {
+                // Devuelve un mensaje detallado del error
+                return BadRequest(new { message = $"{ex.Message}" });
+            }
+
+        }
+
+
         [HttpGet("getReporteComprobantes/{fechaInicio}/{fechaFin}/{transaccion}")]
         public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> ObtenerResumenComprobantes(string fechaInicio, string fechaFin, string transaccion)
         {

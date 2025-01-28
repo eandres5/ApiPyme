@@ -316,25 +316,20 @@ namespace ApiPyme.RepositoriesImpl
 
         public async Task<List<ComprobanteResumenReporteDto>> ObtenerResumenComprobantes(DateTime fechaInicio, DateTime fechaFin, string tipoTransaccion)
         {
-            var resumen = await _context.Comprobantes
+            // Consulta base para obtener la información necesaria
+            var resumenRaw = await _context.Comprobantes
                 .Where(c => c.FechaEmision >= fechaInicio && c.FechaEmision <= fechaFin && c.TipoTransaccion == tipoTransaccion)
                 .Join(
-                    _context.DetalleComprobantes,
+                    _context.DetalleComprobantes.Include(d => d.producto), // Incluye explícitamente la relación con Producto
                     c => c.IdComprobante,
                     d => d.IdComprobante,
                     (c, d) => new { Comprobante = c, Detalle = d }
                 )
                 .Join(
-                    _context.Productos,
-                    cd => cd.Detalle.IdProducto,
-                    p => p.IdProducto,
-                    (cd, p) => new { cd.Comprobante, cd.Detalle, Producto = p }
-                )
-                .Join(
                     _context.Usuarios,
-                    cdp => cdp.Comprobante.IdUsuarioCliente,
+                    cd => cd.Comprobante.IdUsuarioCliente,
                     u => u.IdUsuario,
-                    (cdp, u) => new { cdp.Comprobante, cdp.Detalle, cdp.Producto, Usuario = u }
+                    (cd, u) => new { cd.Comprobante, cd.Detalle, Usuario = u }
                 )
                 .GroupBy(g => new
                 {
@@ -344,7 +339,7 @@ namespace ApiPyme.RepositoriesImpl
                     g.Comprobante.FechaEmision,
                     g.Comprobante.TipoPago
                 })
-                .Select(group => new ComprobanteResumenReporteDto
+                .Select(group => new
                 {
                     NumeroComprobante = group.Key.NumeroComprobante,
                     Nombres = group.Key.Nombres,
@@ -353,9 +348,33 @@ namespace ApiPyme.RepositoriesImpl
                     FechaEmision = group.Key.FechaEmision,
                     Subtotal = group.Sum(x => x.Comprobante.Subtotal),
                     Total = group.Sum(x => x.Comprobante.Total),
-                    Items = group.Count()
+                    Items = group.Count(),
+                    Detalles = group.Select(x => new
+                    {
+                        x.Detalle.Cantidad, // Cantidad del producto
+                        ProductoNombre = x.Detalle.producto.NombreProducto, // Nombre del producto
+                        ProductoDescripcion = x.Detalle.producto.Descripcion // Descripción del producto
+                    }).ToList()
                 })
                 .ToListAsync();
+
+            // Proyección final para el DTO
+            var resumen = resumenRaw.Select(raw => new ComprobanteResumenReporteDto
+            {
+                NumeroComprobante = raw.NumeroComprobante,
+                Nombres = raw.Nombres,
+                Apellidos = raw.Apellidos,
+                TipoPago = raw.TipoPago,
+                FechaEmision = raw.FechaEmision,
+                Subtotal = raw.Subtotal,
+                Total = raw.Total,
+                Items = raw.Items,
+                NombresProductos = raw.Detalles
+                    .Where(d => !string.IsNullOrEmpty(d.ProductoNombre)) // Filtra solo los productos válidos
+                    .Select(d => $"{d.ProductoNombre} (Descripción: {d.ProductoDescripcion}, Cantidad: {d.Cantidad})") // Incluye descripción y cantidad
+                    .Distinct() // Evita duplicados
+                    .ToList()
+            }).ToList();
 
             return resumen;
         }
@@ -363,37 +382,44 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<List<ComprobanteResumenReporteDto>> ObtenerReporteCompras(DateTime fechaInicio, DateTime fechaFin)
         {
             var resumen = _context.Compras
-                .Where(c => c.FechaCompra >= fechaInicio && c.FechaCompra <= fechaFin)
-                .Join(
-                    _context.DetalleCompras,
-                    c => c.IdCompra,
-                    d => d.IdCompra,
-                    (c, d) => new { Compra = c, Detalle = d }
-                )
-                .Join(
-                    _context.Usuarios,
-                    cd => cd.Compra.IdUsuarioProveedor,
-                    u => u.IdUsuario,
-                    (cd, u) => new { cd.Compra, cd.Detalle, Usuario = u }
-                )
-                .GroupBy(x => new
-                {
-                    x.Compra.NumeroCompra,
-                    x.Usuario.Nombres,
-                    x.Usuario.Apellidos,
-                    x.Compra.FechaCompra,
-                    x.Compra.TotalCompra
-                })
-                .Select(g => new ComprobanteResumenReporteDto
-                {
-                    NumeroComprobante = g.Key.NumeroCompra,
-                    Nombres = g.Key.Nombres,
-                    Apellidos = g.Key.Apellidos,
-                    FechaEmision = g.Key.FechaCompra,
-                    Total = g.Key.TotalCompra,
-                    Items = g.Count()
-                })
-                .ToList();
+    .Where(c => c.FechaCompra >= fechaInicio && c.FechaCompra <= fechaFin)
+    .Join(
+        _context.DetalleCompras.Include(d => d.producto), // Incluye la relación con Producto
+        c => c.IdCompra,
+        d => d.IdCompra,
+        (c, d) => new { Compra = c, Detalle = d }
+    )
+    .Join(
+        _context.Usuarios,
+        cd => cd.Compra.IdUsuarioProveedor,
+        u => u.IdUsuario,
+        (cd, u) => new { cd.Compra, cd.Detalle, Usuario = u }
+    )
+    .GroupBy(x => new
+    {
+        x.Compra.NumeroCompra,
+        x.Usuario.Nombres,
+        x.Usuario.Apellidos,
+        x.Compra.FechaCompra,
+        x.Compra.TotalCompra
+    })
+    .Select(g => new ComprobanteResumenReporteDto
+    {
+        NumeroComprobante = g.Key.NumeroCompra,
+        Nombres = g.Key.Nombres,
+        Apellidos = g.Key.Apellidos,
+        FechaEmision = g.Key.FechaCompra,
+        Total = g.Key.TotalCompra,
+        Items = g.Count(),
+        DetallesProductos = g.Select(x => new DetalleProductoDto
+        {
+            NombreProducto = x.Detalle.producto != null ? x.Detalle.producto.NombreProducto : "Sin producto",
+            Cantidad = x.Detalle.CantidadInicial.ToString(),
+            Descripcion = x.Detalle.producto != null ? x.Detalle.producto.Descripcion : "Sin descripción"
+        }).ToList() // Crea una lista de productos por cada grupo
+    })
+    .ToList();
+
             return resumen;
         }
 
@@ -439,6 +465,65 @@ namespace ApiPyme.RepositoriesImpl
             }
         }
 
+        public async Task<ComprobanteDto> GetComprobanteVentaDevolucion(string identificacion, string numeroComprobante, string tipoTransaccion)
+        {
 
+            // Validación previa: Verificar si ya existe un comprobante con los mismos datos de entrada
+            var comprobanteExistente = await _context.Comprobantes
+                .FirstOrDefaultAsync(c =>
+                    c.usuarioCliente.Identificacion == identificacion &&
+                    c.NumeroComprobante == numeroComprobante &&
+                    c.TipoTransaccion == "DEVOLUCION");
+
+            if (comprobanteExistente != null)
+            {
+                // Si ya existe un comprobante, no continuar y retornar null o alguna otra respuesta
+                throw new Exception("Devolucion ya registrada con estos datos"); // O puedes lanzar una excepción o retornar un mensaje de error
+            }
+
+            var comprobante = await _context.Comprobantes
+         .Include(c => c.detallesComprobante)
+         .Include(c => c.usuarioCliente)
+         .Include(c => c.usuarioComerciante)
+         .FirstOrDefaultAsync(c =>
+             c.usuarioCliente.Identificacion == identificacion &&
+             c.NumeroComprobante == numeroComprobante &&
+             c.TipoTransaccion == tipoTransaccion);
+
+            if (comprobante == null)
+            {
+                return null;
+            }
+
+            // Leer y convertir el archivo PDF a Base64
+            string? fileBase64 = null;
+            if (!string.IsNullOrEmpty(comprobante.PathPdf) && File.Exists(comprobante.PathPdf))
+            {
+                var fileBytes = await File.ReadAllBytesAsync(comprobante.PathPdf);
+                fileBase64 = Convert.ToBase64String(fileBytes);
+            }
+
+            var comprobanteDto = new ComprobanteDto
+            {
+                IdComprobante = comprobante.IdComprobante.ToString(),
+                NumeroComprobante = comprobante.NumeroComprobante,
+                TipoComprobante = comprobante.TipoComprobante,
+                TipoTransaccion = comprobante.TipoTransaccion,
+                TipoPago = comprobante.TipoPago,
+                FechaEmision = comprobante.FechaEmision.ToString("yyyy-MM-dd"), // Formato de fecha
+                Subtotal = comprobante.Subtotal.ToString("F2"), // Formato decimal con dos decimales
+                Total = comprobante.Total.ToString("F2"),
+                Iva = comprobante.Iva.ToString(),
+                IdUsuarioCliente = comprobante.IdUsuarioCliente?.ToString(),
+                IdUsuarioComerciante = comprobante.IdUsuarioComerciante?.ToString(),
+                NombreCliente = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos,
+                Identificacion = comprobante.usuarioCliente?.Identificacion?.ToString(),
+                Direccion = comprobante.usuarioCliente?.Direccion?.ToString(),
+                UsuarioClienteNombre = comprobante.usuarioCliente?.Nombres + " " + comprobante.usuarioCliente?.Apellidos,
+                FileBase64 = fileBase64
+            };
+
+            return comprobanteDto;
+        }
     }
 }
