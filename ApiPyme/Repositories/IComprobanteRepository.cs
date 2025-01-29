@@ -6,7 +6,7 @@ namespace ApiPyme.Repositories
     public interface IComprobanteRepository
     {
         Task<ComprobanteDto> GetComprobante(int id, string tipoTransacion);
-        Task<ComprobanteDto> GetComprobanteVentaDevolucion(string identificacion, string numeroComprobante, string tipoTransaccion);
+        Task<ComprobanteDto> GetComprobanteVentaDevolucion(string identificacion, string numeroComprobante, string tipoTransaccion, string tipoComprobante);
         Task<bool> Save(ComprobanteDto comprobanteDto);
         Task<bool> Update(Comprobante comprobante);
         Task<bool> Delete(int id);

@@ -465,21 +465,21 @@ namespace ApiPyme.RepositoriesImpl
             }
         }
 
-        public async Task<ComprobanteDto> GetComprobanteVentaDevolucion(string identificacion, string numeroComprobante, string tipoTransaccion)
+        public async Task<ComprobanteDto> GetComprobanteVentaDevolucion(string identificacion, string numeroComprobante, string tipoTransaccion, string tipoComprobante)
         {
 
-            // Validación previa: Verificar si ya existe un comprobante con los mismos datos de entrada
-            var comprobanteExistente = await _context.Comprobantes
-                .FirstOrDefaultAsync(c =>
-                    c.usuarioCliente.Identificacion == identificacion &&
-                    c.NumeroComprobante == numeroComprobante &&
-                    c.TipoTransaccion == "DEVOLUCION");
+            //// Validación previa: Verificar si ya existe un comprobante con los mismos datos de entrada
+            //var comprobanteExistente = await _context.Comprobantes
+            //    .FirstOrDefaultAsync(c =>
+            //        c.usuarioCliente.Identificacion == identificacion &&
+            //        c.NumeroComprobante == numeroComprobante &&
+            //        c.TipoTransaccion == "DEVOLUCION");
 
-            if (comprobanteExistente != null)
-            {
-                // Si ya existe un comprobante, no continuar y retornar null o alguna otra respuesta
-                throw new Exception("Devolucion ya registrada con estos datos"); // O puedes lanzar una excepción o retornar un mensaje de error
-            }
+            //if (comprobanteExistente != null)
+            //{
+            //    // Si ya existe un comprobante, no continuar y retornar null o alguna otra respuesta
+            //    throw new Exception("Devolucion ya registrada con estos datos"); // O puedes lanzar una excepción o retornar un mensaje de error
+            //}
 
             var comprobante = await _context.Comprobantes
          .Include(c => c.detallesComprobante)
@@ -488,7 +488,8 @@ namespace ApiPyme.RepositoriesImpl
          .FirstOrDefaultAsync(c =>
              c.usuarioCliente.Identificacion == identificacion &&
              c.NumeroComprobante == numeroComprobante &&
-             c.TipoTransaccion == tipoTransaccion);
+             c.TipoTransaccion == tipoTransaccion &&
+             c.TipoComprobante == tipoComprobante);
 
             if (comprobante == null)
             {
