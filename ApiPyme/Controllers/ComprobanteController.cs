@@ -160,6 +160,21 @@ namespace ApiPyme.Controllers
 
         }
 
+        [HttpGet("getReporteGrafico/{transaccion}")]
+        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> ObtenerReporteGrafico(string transaccion)
+        {
+            try
+            {
+                var comprobantes = await _comprobanteRepository.ObtenerReporteGrafico(transaccion);
+                return Ok(comprobantes);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Mensaje = ex.Message });
+            }
+
+        }
+
     }
 
 }

@@ -526,5 +526,21 @@ namespace ApiPyme.RepositoriesImpl
 
             return comprobanteDto;
         }
+
+        public async Task<List<ReporteGraficoMensual>> ObtenerReporteGrafico(string transaccion)
+        {
+            return _context.Comprobantes
+                .Where(c => c.TipoTransaccion == transaccion)
+                .GroupBy(c => new { Anio = c.CreatedAt.Year, Mes = c.CreatedAt.Month })
+                .Select(g => new ReporteGraficoMensual
+                {
+                    Anio = g.Key.Anio,
+                    Mes = g.Key.Mes,
+                    TotalVentas = g.Sum(c => c.Total)
+                })
+                .OrderBy(g => g.Anio)
+                .ThenBy(g => g.Mes)
+                .ToList();
+        }
     }
 }
