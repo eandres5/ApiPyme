@@ -17,7 +17,7 @@ namespace ApiPyme.Repositories
         Task<List<ComprobanteResumenReporteDto>> ObtenerResumenComprobantes(DateTime fechaInicio, DateTime fechaFin, string tipoTransaccion);
         Task<List<ComprobanteResumenReporteDto>> ObtenerReporteCompras(DateTime fechaInicio, DateTime fechaFin);
         Task<List<ComprobanteResumenDto>> GetResumenVentas();
-        Task<int> GetUltimoNumeroComprobante(string tipoComprobante);
+        Task<int> GetUltimoNumeroComprobante(string tipoComprobante, string tipoTransaccion);
         Task<List<ReporteGraficoMensual>> ObtenerReporteGrafico(string transaccion);
     }
 }

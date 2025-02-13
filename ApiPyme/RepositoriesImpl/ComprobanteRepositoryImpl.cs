@@ -139,7 +139,7 @@ namespace ApiPyme.RepositoriesImpl
                 var usuarioComerciante = await _usuarioRepository.GetUsuario(Int32.Parse(comprobanteDto.IdUsuarioComerciante));
                 //  guardo la cabecera
 
-                int numeroComprobante = await GetUltimoNumeroComprobante(comprobanteDto.TipoComprobante);
+                int numeroComprobante = await GetUltimoNumeroComprobante(comprobanteDto.TipoComprobante, comprobanteDto.TipoTransaccion);
 
                 Comprobante comprobante = new Comprobante();
                 comprobante.NumeroComprobante = numeroComprobante.ToString();
@@ -337,7 +337,8 @@ namespace ApiPyme.RepositoriesImpl
                     g.Usuario.Nombres,
                     g.Usuario.Apellidos,
                     g.Comprobante.FechaEmision,
-                    g.Comprobante.TipoPago
+                    g.Comprobante.TipoPago,
+                    g.Comprobante.TipoComprobante // Agregado aquí
                 })
                 .Select(group => new
                 {
@@ -346,6 +347,7 @@ namespace ApiPyme.RepositoriesImpl
                     Apellidos = group.Key.Apellidos,
                     TipoPago = group.Key.TipoPago,
                     FechaEmision = group.Key.FechaEmision,
+                    TipoComprobante = group.Key.TipoComprobante, // Agregado aquí
                     Subtotal = group.Sum(x => x.Comprobante.Subtotal),
                     Total = group.Sum(x => x.Comprobante.Total),
                     Items = group.Count(),
@@ -366,6 +368,7 @@ namespace ApiPyme.RepositoriesImpl
                 Apellidos = raw.Apellidos,
                 TipoPago = raw.TipoPago,
                 FechaEmision = raw.FechaEmision,
+                TipoComprobante = raw.TipoComprobante,
                 Subtotal = raw.Subtotal,
                 Total = raw.Total,
                 Items = raw.Items,
@@ -382,60 +385,66 @@ namespace ApiPyme.RepositoriesImpl
         public async Task<List<ComprobanteResumenReporteDto>> ObtenerReporteCompras(DateTime fechaInicio, DateTime fechaFin)
         {
             var resumen = _context.Compras
-    .Where(c => c.FechaCompra >= fechaInicio && c.FechaCompra <= fechaFin)
-    .Join(
-        _context.DetalleCompras.Include(d => d.producto), // Incluye la relación con Producto
-        c => c.IdCompra,
-        d => d.IdCompra,
-        (c, d) => new { Compra = c, Detalle = d }
-    )
-    .Join(
-        _context.Usuarios,
-        cd => cd.Compra.IdUsuarioProveedor,
-        u => u.IdUsuario,
-        (cd, u) => new { cd.Compra, cd.Detalle, Usuario = u }
-    )
-    .GroupBy(x => new
-    {
-        x.Compra.NumeroCompra,
-        x.Usuario.Nombres,
-        x.Usuario.Apellidos,
-        x.Compra.FechaCompra,
-        x.Compra.TotalCompra
-    })
-    .Select(g => new ComprobanteResumenReporteDto
-    {
-        NumeroComprobante = g.Key.NumeroCompra,
-        Nombres = g.Key.Nombres,
-        Apellidos = g.Key.Apellidos,
-        FechaEmision = g.Key.FechaCompra,
-        Total = g.Key.TotalCompra,
-        Items = g.Count(),
-        DetallesProductos = g.Select(x => new DetalleProductoDto
-        {
-            NombreProducto = x.Detalle.producto != null ? x.Detalle.producto.NombreProducto : "Sin producto",
-            Cantidad = x.Detalle.CantidadInicial.ToString(),
-            Descripcion = x.Detalle.producto != null ? x.Detalle.producto.Descripcion : "Sin descripción"
-        }).ToList() // Crea una lista de productos por cada grupo
-    })
-    .ToList();
+                .Where(c => c.FechaCompra >= fechaInicio && c.FechaCompra <= fechaFin)
+                .Join(
+                    _context.DetalleCompras.Include(d => d.producto), // Incluye la relación con Producto
+                    c => c.IdCompra,
+                    d => d.IdCompra,
+                    (c, d) => new { Compra = c, Detalle = d }
+                )
+                .Join(
+                    _context.Usuarios,
+                    cd => cd.Compra.IdUsuarioProveedor,
+                    u => u.IdUsuario,
+                    (cd, u) => new { cd.Compra, cd.Detalle, Usuario = u }
+                )
+                .GroupBy(x => new
+                {
+                    x.Compra.NumeroCompra,
+                    x.Usuario.Nombres,
+                    x.Usuario.Apellidos,
+                    x.Compra.FechaCompra,
+                    x.Compra.TotalCompra,
+                    x.Compra.TipoComprobante // Agregado aquí
+                })
+                .Select(g => new ComprobanteResumenReporteDto
+                {
+                    NumeroComprobante = g.Key.NumeroCompra,
+                    Nombres = g.Key.Nombres,
+                    Apellidos = g.Key.Apellidos,
+                    FechaEmision = g.Key.FechaCompra,
+                    Total = g.Key.TotalCompra,
+                    TipoComprobante = g.Key.TipoComprobante, // Asignado aquí
+                    Items = g.Count(),
+                    DetallesProductos = g.Select(x => new DetalleProductoDto
+                    {
+                        NombreProducto = x.Detalle.producto != null ? x.Detalle.producto.NombreProducto : "Sin producto",
+                        Cantidad = x.Detalle.CantidadInicial.ToString(),
+                        Descripcion = x.Detalle.producto != null ? x.Detalle.producto.Descripcion : "Sin descripción"
+                    }).ToList() // Crea una lista de productos por cada grupo
+                })
+                .ToList();
 
             return resumen;
         }
 
-        public async Task<int> GetUltimoNumeroComprobante(string tipoComprobante)
+        public async Task<int> GetUltimoNumeroComprobante(string tipoComprobante, string tipoTransaccion)
         {
             int numeroComprobante = 0;
+
             var ultimoNumeroComprobante = await _context.Comprobantes
-                .Where(c => c.TipoComprobante == tipoComprobante)
+                .Where(c => c.TipoComprobante == tipoComprobante && c.TipoTransaccion == tipoTransaccion) // Agregado aquí
                 .OrderByDescending(c => c.NumeroComprobante)
                 .Select(c => c.NumeroComprobante)
                 .FirstOrDefaultAsync();
 
-            if (ultimoNumeroComprobante != null ) {
-                numeroComprobante = Int32.Parse(ultimoNumeroComprobante) + 1;
-            } else {
-                numeroComprobante++;
+            if (!string.IsNullOrEmpty(ultimoNumeroComprobante)) // Evitar excepciones con null
+            {
+                numeroComprobante = int.Parse(ultimoNumeroComprobante) + 1;
+            }
+            else
+            {
+                numeroComprobante = 1; // Se inicia desde 1 en caso de que no haya registros previos
             }
 
             return numeroComprobante;
@@ -529,18 +538,18 @@ namespace ApiPyme.RepositoriesImpl
 
         public async Task<List<ReporteGraficoMensual>> ObtenerReporteGrafico(string transaccion)
         {
-            return _context.Comprobantes
+            return await _context.Comprobantes
                 .Where(c => c.TipoTransaccion == transaccion)
                 .GroupBy(c => new { Anio = c.CreatedAt.Year, Mes = c.CreatedAt.Month })
                 .Select(g => new ReporteGraficoMensual
                 {
                     Anio = g.Key.Anio,
                     Mes = g.Key.Mes,
-                    TotalVentas = g.Sum(c => c.Total)
+                    TotalVentas = g.Sum(c => (decimal)c.Total) // Convertimos explícitamente a decimal
                 })
                 .OrderBy(g => g.Anio)
                 .ThenBy(g => g.Mes)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

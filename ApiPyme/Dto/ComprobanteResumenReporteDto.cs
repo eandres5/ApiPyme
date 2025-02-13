@@ -9,6 +9,7 @@
         public decimal Subtotal { get; set; }
         public decimal Total { get; set; }
         public string TipoPago { get; set; }
+        public string TipoComprobante { get; set; }
         public int Items { get; set; }
         public List<string> NombresProductos { get; set; }
         public List<DetalleProductoDto> DetallesProductos { get; set; }

@@ -216,7 +216,7 @@ namespace ApiPyme.RepositoriesImpl
                 .Select(g => new ComprobanteResumenDto
                 {
                     TipoComprobante = g.Key,
-                    Total = Math.Round(g.Sum(c => c.TotalCompra))
+                    Total = g.Sum(c => (decimal)c.TotalCompra) // Asegurar conversión a decimal si es necesario
                 })
                 .ToListAsync();
 

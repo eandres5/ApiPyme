@@ -268,6 +268,52 @@ namespace ApiPyme.RepositoriesImpl
             };
         }
 
+        public async Task<PagedResult<ProductoDto>> GetProductosByUsuarioDescripcion(int page, int size, string search)
+        {
+            var query = from p in _context.Productos
+                        join u in _context.Usuarios on p.IdUsuarioProveedor equals u.IdUsuario
+                        where p.Activo == true
+                        select new
+                        {
+                            p,
+                            UsuarioId = u.IdUsuario,
+                            UsuarioNombre = u.Nombres,
+                            UsuarioApellido = u.Apellidos
+                        };
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u => u.p.Descripcion.ToLower().Contains(search.ToLower()));
+            }
+
+            if (page < 1) page = 1;
+            if (size < 1) size = 10;
+
+            int skip = (page - 1) * size;
+            int totalCount = await query.CountAsync();
+            var items = await query.Skip(skip).Take(size).ToListAsync();
+
+            var productoDto = items.Select(p => new ProductoDto
+            {
+                IdProducto = p.p.IdProducto.ToString(),
+                NombreProducto = p.p.NombreProducto,
+                Descripcion = p.p.Descripcion,
+                NombreCategoria = p.p.NombreCategoria,
+                Precio = p.p.Precio.ToString("F2", CultureInfo.InvariantCulture),
+                Stock = p.p.Stock + "",
+                Activo = p.p.Activo,
+                CreatedAt = p.p.CreatedAt,
+                IdProveedor = p.UsuarioId.ToString(),
+                Proveedor = p.UsuarioNombre + " " + p.UsuarioApellido
+            });
+
+            return new PagedResult<ProductoDto>
+            {
+                TotalCount = totalCount,
+                Items = productoDto
+            };
+        }
+
         public async Task<PagedResult<ProductoDto>> GetProductosByProveedor(int page, int size, string identificacion, string search)
         {
             // Construir la consulta inicial con el join y el filtro por identificación

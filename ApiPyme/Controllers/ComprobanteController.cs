@@ -144,13 +144,13 @@ namespace ApiPyme.Controllers
 
         }
 
-        [HttpGet("getUltimoComprobante/{tipoComprobante}")]
-        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> GetUltimoNumeroComprobante(string tipoComprobante)
+        [HttpGet("getUltimoComprobante/{tipoComprobante}/{tipoTransaccion}")]
+        public async Task<ActionResult<IEnumerable<ComprobanteResumenReporteDto>>> GetUltimoNumeroComprobante(string tipoComprobante, string tipoTransaccion)
         {
 
             try
             {
-                var comprobantes = await _comprobanteRepository.GetUltimoNumeroComprobante(tipoComprobante);
+                var comprobantes = await _comprobanteRepository.GetUltimoNumeroComprobante(tipoComprobante, tipoTransaccion);
                 return Ok(comprobantes);
             }
             catch (ArgumentException ex)
