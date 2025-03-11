@@ -19,5 +19,6 @@ namespace ApiPyme.Repositories
         Task<List<ComprobanteResumenDto>> GetResumenVentas();
         Task<int> GetUltimoNumeroComprobante(string tipoComprobante, string tipoTransaccion);
         Task<List<ReporteGraficoMensual>> ObtenerReporteGrafico(string transaccion);
+        Task<List<ReporteGraficoMensual>> ObtenerReporteGraficoCompras();
     }
 }

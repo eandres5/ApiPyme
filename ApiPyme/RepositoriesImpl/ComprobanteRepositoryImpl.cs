@@ -551,5 +551,23 @@ namespace ApiPyme.RepositoriesImpl
                 .ThenBy(g => g.Mes)
                 .ToListAsync();
         }
+
+        public async Task<List<ReporteGraficoMensual>> ObtenerReporteGraficoCompras()
+        {
+            int anioActual = DateTime.Now.Year;
+
+            return await _context.Compras
+                .Where(c => c.CreatedAt.Year == anioActual)
+                .GroupBy(c => new { Anio = c.CreatedAt.Year, Mes = c.CreatedAt.Month })
+                .Select(g => new ReporteGraficoMensual
+                {
+                    Anio = g.Key.Anio,
+                    Mes = g.Key.Mes,
+                    TotalVentas = g.Sum(c => (decimal)c.TotalCompra) // Aseguramos la conversión a decimal
+                })
+                .OrderBy(g => g.Anio)
+                .ThenBy(g => g.Mes)
+                .ToListAsync();
+        }
     }
 }
